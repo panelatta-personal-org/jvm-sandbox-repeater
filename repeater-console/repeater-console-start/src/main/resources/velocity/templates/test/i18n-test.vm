@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="/favorite.ico" type="image/x-icon"/>
+    <link rel="icon" href="/favorite.ico" type="image/x-icon"/>
+    <link rel="bookmark" href="/favorite.ico" type="image/x-icon"/>
+    <title>国际化测试页面 - Repeater</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+    #parse("blocks/navbar.vm")
+    
+    <div class="content-wrapper" style="margin-left: 0;">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>国际化测试页面 / I18n Test Page</h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">后端国际化测试 (Velocity模板)</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>nav.online.traffic</td>
+                                        <td>$i18n.get("nav.online.traffic")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>nav.config.management</td>
+                                        <td>$i18n.get("nav.config.management")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>nav.online.module</td>
+                                        <td>$i18n.get("nav.online.module")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>button.query</td>
+                                        <td>$i18n.get("button.query")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>button.add</td>
+                                        <td>$i18n.get("button.add")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>label.app.name</td>
+                                        <td>$i18n.get("label.app.name")</td>
+                                    </tr>
+                                    <tr>
+                                        <td>msg.network.error</td>
+                                        <td>$i18n.get("msg.network.error")</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">前端国际化测试 (JavaScript)</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered" id="js-i18n-test">
+                                <thead>
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- 将通过JavaScript动态填充 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">测试按钮</h3>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary" onclick="testAlert()">$i18n.get("button.query")</button>
+                            <button class="btn btn-success" onclick="testNotice()">$i18n.get("button.add")</button>
+                            <button class="btn btn-info" onclick="switchLang()">切换语言 / Switch Language</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+#parse("blocks/header-scripts.vm")
+#parse("blocks/fakeloader.vm")
+
+<script type="application/javascript">
+jQuery(function($) {
+    // 测试前端国际化
+    var testKeys = [
+        'nav.online.traffic',
+        'nav.config.management',
+        'nav.online.module',
+        'button.query',
+        'button.add',
+        'label.app.name',
+        'msg.network.error'
+    ];
+    
+    var tbody = $('#js-i18n-test tbody');
+    testKeys.forEach(function(key) {
+        var row = '<tr><td>' + key + '</td><td>' + i18n.get(key) + '</td></tr>';
+        tbody.append(row);
+    });
+});
+
+function testAlert() {
+    alert(i18n.get('msg.success'));
+}
+
+function testNotice() {
+    notice(i18n.get('msg.network.error'), false);
+}
+
+function switchLang() {
+    var currentLocale = i18n.getCurrentLocale();
+    var newLocale = currentLocale === 'zh_CN' ? 'en_US' : 'zh_CN';
+    i18n.switchLocale(newLocale);
+}
+</script>
+
+</body>
+</html>

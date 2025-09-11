@@ -1,0 +1,32 @@
+## 导航栏片段，包含语言切换器
+<!-- Navbar -->
+<nav class="main-header navbar navbar-expand navbar-dark">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+        </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+        <!-- 语言切换器 -->
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#">
+                <i class="fas fa-language"></i>
+                <span id="current-language">中文</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right">
+                <a href="#" class="dropdown-item" onclick="i18n.switchLocale('zh_CN'); return false;">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIxNSIgZmlsbD0iI2RlMjkxMCIvPgogICAgPGcgZmlsbD0iI2ZmZGUwMCI+CiAgICAgICAgPHBhdGggZD0iTTMuNSAzLjVMMi41IDIuNWwxLTFsLjUgMS0uNSAxeiIvPgogICAgICAgIDxwYXRoIGQ9Ik01IDUuNUw0IDQuNWwxLTFsLjUgMS0uNSAxeiIvPgogICAgICAgIDxwYXRoIGQ9Ik02LjUgMy41TDUuNSAyLjVsMS0xbC41IDEtLjUgMXoiLz4KICAgICAgICA8cGF0aCBkPSJNNSAyTDQgMWwxLTFsLjUgMS0uNSAxeiIvPgogICAgICAgIDxwYXRoIGQ9Ik01IDZMNSA0bDEgMHYyeiIvPgogICAgPC9nPgo8L3N2Zz4=" alt="中文" width="20" height="15" style="margin-right: 5px;">
+                    中文
+                </a>
+                <a href="#" class="dropdown-item" onclick="i18n.switchLocale('en_US'); return false;">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMTUiIHZpZXdCb3g9IjAgMCAyMCAxNSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIxNSIgZmlsbD0iI2I1MjEyNiIvPgogICAgPHJlY3QgeT0iMS4xNTQiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxLjE1NCIgZmlsbD0iI2ZmZiIvPgogICAgPHJlY3QgeT0iMy40NjIiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxLjE1NCIgZmlsbD0iI2ZmZiIvPgogICAgPHJlY3QgeT0iNS43NjkiIHdpZHRoPSIyMCIgaGVpZ2h0PSIxLjE1NCIgZmlsbD0iI2ZmZiIvPgogICAgPHJlY3QgeT0iOC4wNzciIHdpZHRoPSIyMCIgaGVpZ2h0PSIxLjE1NCIgZmlsbD0iI2ZmZiIvPgogICAgPHJlY3QgeT0iMTAuMzg1IiB3aWR0aD0iMjAiIGhlaWdodD0iMS4xNTQiIGZpbGw9IiNmZmYiLz4KICAgIDxyZWN0IHk9IjEyLjY5MiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjEuMTU0IiBmaWxsPSIjZmZmIi8+CiAgICA8cmVjdCB3aWR0aD0iNy42OTIiIGhlaWdodD0iOC4wNzciIGZpbGw9IiMzYzNiNmUiLz4KICAgIDxnIGZpbGw9IiNmZmYiPgogICAgICAgIDxwb2x5Z29uIHBvaW50cz0iMS4xNTQsMS41MzggMS4zNDYsMi4xMTUgMS45MjMsMi4xMTUgMS40NjIsMS43MzEgMS42NTQsMS4xNTQgMS4xNTQsMS41MzgiLz4KICAgICAgICA8cG9seWdvbiBwb2ludHM9IjQuNjE1LDEuNTM4IDQuODA4LDIuMTE1IDUuMzg1LDIuMTE1IDQuOTIzLDEuNzMxIDUuMTE1LDEuMTU0IDQuNjE1LDEuNTM4Ii8+CiAgICAgICAgPHBvbHlnb24gcG9pbnRzPSIxLjE1NCw0LjYxNSAxLjM0Niw1LjE5MiAxLjkyMyw1LjE5MiAxLjQ2Miw0LjgwOCAxLjY1NCw0LjIzMSAxLjE1NCw0LjYxNSIvPgogICAgICAgIDxwb2x5Z29uIHBvaW50cz0iNC42MTUsNC42MTUgNC44MDgsNS4xOTIgNS4zODUsNS4xOTIgNC45MjMsNC44MDggNS4xMTUsNC4yMzEgNC42MTUsNC42MTUiLz4KICAgIDwvZz4KPC9zdmc+" alt="English" width="20" height="15" style="margin-right: 5px;">
+                    English
+                </a>
+            </div>
+        </li>
+    </ul>
+</nav>
+<!-- /.navbar -->

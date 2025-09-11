@@ -1,0 +1,13 @@
+## 通用的头部脚本，包含国际化支持
+<!-- jQuery -->
+<script src="/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/dist/js/demo.js"></script>
+<!-- 国际化支持 -->
+<script src="/app/js/i18n.js" charset="UTF-8"></script>
+<!-- 应用通用脚本 -->
+<script src="/app/js/app.js" charset="UTF-8"></script>

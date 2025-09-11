@@ -33,7 +33,7 @@ var innerAsyncAjax = function (uri, data, type, callback) {
         dataType: 'json',
         error: function (XMLHttpRequest) {
             hideLoading(100)
-            notice("服务抽风了，网络异常 " + XMLHttpRequest.responseText, false);
+            notice(i18n.get("msg.network.error") + " " + XMLHttpRequest.responseText, false);
         }
     });
 };
@@ -59,7 +59,7 @@ var innerSyncAjax = function (uri, data, type, callback) {
         dataType: 'json',
         error: function (XMLHttpRequest) {
             hideLoading(500)
-            notice("服务抽风了，网络异常 " + XMLHttpRequest.responseText, false);
+            notice(i18n.get("msg.network.error") + " " + XMLHttpRequest.responseText, false);
         }
     });
 };

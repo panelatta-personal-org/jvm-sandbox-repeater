@@ -1,0 +1,190 @@
+/**
+ * 国际化模块
+ * 提供前端页面的国际化支持
+ */
+var i18n = {
+    // 当前语言
+    locale: 'zh_CN',
+    
+    // 消息缓存
+    messages: {},
+    
+    // 支持的语言列表
+    supportedLocales: [],
+    
+    /**
+     * 初始化国际化模块
+     * @param locale 指定的语言，如果不指定则从Cookie中获取
+     */
+    init: function(locale) {
+        // 设置语言
+        this.locale = locale || this.getLocaleFromCookie() || 'zh_CN';
+        
+        // 加载消息
+        this.loadMessages();
+        
+        // 加载支持的语言列表
+        this.loadSupportedLocales();
+        
+        // 更新页面语言显示
+        this.updateLanguageDisplay();
+    },
+    
+    /**
+     * 加载国际化消息
+     */
+    loadMessages: function() {
+        var self = this;
+        $.ajax({
+            url: '/api/i18n/messages',
+            type: 'GET',
+            data: { locale: this.locale },
+            async: false,
+            success: function(data) {
+                self.messages = data;
+            },
+            error: function() {
+                console.error('Failed to load i18n messages');
+                self.messages = {};
+            }
+        });
+    },
+    
+    /**
+     * 加载支持的语言列表
+     */
+    loadSupportedLocales: function() {
+        var self = this;
+        $.ajax({
+            url: '/api/i18n/supported-locales',
+            type: 'GET',
+            async: false,
+            success: function(data) {
+                self.supportedLocales = data;
+            },
+            error: function() {
+                console.error('Failed to load supported locales');
+                self.supportedLocales = [
+                    { locale: 'zh_CN', displayName: '中文' },
+                    { locale: 'en_US', displayName: 'English' }
+                ];
+            }
+        });
+    },
+    
+    /**
+     * 获取国际化消息
+     * @param key 消息key
+     * @param args 参数数组
+     * @returns {string} 国际化后的消息
+     */
+    get: function(key) {
+        var message = this.messages[key] || key;
+        
+        // 处理参数替换
+        if (arguments.length > 1) {
+            for (var i = 1; i < arguments.length; i++) {
+                var placeholder = '{' + (i - 1) + '}';
+                message = message.replace(new RegExp(placeholder, 'g'), arguments[i]);
+            }
+        }
+        
+        return message;
+    },
+    
+    /**
+     * 切换语言
+     * @param locale 目标语言
+     */
+    switchLocale: function(locale) {
+        if (locale && locale !== this.locale) {
+            this.setLocaleToCookie(locale);
+            // 通过URL参数切换语言并刷新页面
+            var url = window.location.href;
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            
+            // 移除已存在的lang参数
+            url = url.replace(/[?&]lang=[^&]*/g, '');
+            
+            // 添加新的lang参数
+            window.location.href = url + separator + 'lang=' + locale;
+        }
+    },
+    
+    /**
+     * 从Cookie中获取语言设置
+     * @returns {string|null} 语言代码
+     */
+    getLocaleFromCookie: function() {
+        var name = 'repeater_locale=';
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return null;
+    },
+    
+    /**
+     * 将语言设置保存到Cookie
+     * @param locale 语言代码
+     */
+    setLocaleToCookie: function(locale) {
+        var d = new Date();
+        d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30天
+        var expires = 'expires=' + d.toUTCString();
+        document.cookie = 'repeater_locale=' + locale + ';' + expires + ';path=/';
+    },
+    
+    /**
+     * 更新页面上的语言显示
+     */
+    updateLanguageDisplay: function() {
+        var currentLocale = this.locale;
+        var displayName = '中文'; // 默认
+        
+        for (var i = 0; i < this.supportedLocales.length; i++) {
+            if (this.supportedLocales[i].locale === currentLocale) {
+                displayName = this.supportedLocales[i].displayName;
+                break;
+            }
+        }
+        
+        $('#current-language').text(displayName);
+    },
+    
+    /**
+     * 获取当前语言
+     * @returns {string} 当前语言代码
+     */
+    getCurrentLocale: function() {
+        return this.locale;
+    },
+    
+    /**
+     * 判断是否为中文
+     * @returns {boolean}
+     */
+    isChinese: function() {
+        return this.locale.indexOf('zh') === 0;
+    },
+    
+    /**
+     * 判断是否为英文
+     * @returns {boolean}
+     */
+    isEnglish: function() {
+        return this.locale.indexOf('en') === 0;
+    }
+};
+
+// 页面加载完成后初始化
+$(document).ready(function() {
+    i18n.init();
+});

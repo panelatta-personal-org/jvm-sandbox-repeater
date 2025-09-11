@@ -31,6 +31,7 @@ public class OnlineController {
 
     @RequestMapping("search.htm")
     public String search(@ModelAttribute("requestParams") RecordParams params, Model model){
+        model.addAttribute("currentPage", "online");
         PageResult<RecordBO> result = recordService.query(params);
         PagerAdapter.transform0(result,model);
         return "online/search";
@@ -38,6 +39,7 @@ public class OnlineController {
 
     @RequestMapping("detail.htm")
     public String detail(@ModelAttribute("requestParams") RecordParams params, Model model){
+        model.addAttribute("currentPage", "online");
         RepeaterResult<RecordDetailBO> result = recordService.getDetail(params);
         if (!result.isSuccess()) {
             return "/error/404";

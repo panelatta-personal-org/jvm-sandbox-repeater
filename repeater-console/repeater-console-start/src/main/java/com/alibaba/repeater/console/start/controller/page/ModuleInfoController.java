@@ -32,6 +32,7 @@ public class ModuleInfoController {
 
     @RequestMapping("list.htm")
     public String list(@ModelAttribute("requestParams") ModuleInfoParams params, Model model) {
+        model.addAttribute("currentPage", "module");
         PageResult<ModuleInfoBO> result = moduleInfoService.query(params);
         PagerAdapter.transform0(result, model);
         return "module/list";

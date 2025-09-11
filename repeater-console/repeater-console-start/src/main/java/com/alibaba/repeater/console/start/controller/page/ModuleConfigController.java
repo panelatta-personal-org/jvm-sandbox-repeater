@@ -36,6 +36,7 @@ public class ModuleConfigController {
 
     @RequestMapping("list.htm")
     public String list(@ModelAttribute("requestParams") ModuleConfigParams params, Model model) {
+        model.addAttribute("currentPage", "config");
         PageResult<ModuleConfigBO> result = moduleConfigService.list(params);
         PagerAdapter.transform0(result, model);
         return "config/list";
@@ -43,6 +44,7 @@ public class ModuleConfigController {
 
     @RequestMapping("detail.htm")
     public String detail(@ModelAttribute("requestParams") ModuleConfigParams params, Model model) {
+        model.addAttribute("currentPage", "config");
         RepeaterResult<ModuleConfigBO> result = moduleConfigService.query(params);
         if (!result.isSuccess()) {
             return "/error/404";
@@ -53,6 +55,7 @@ public class ModuleConfigController {
 
     @RequestMapping("edit.htm")
     public String edit(@ModelAttribute("requestParams") ModuleConfigParams params, Model model) {
+        model.addAttribute("currentPage", "config");
         RepeaterResult<ModuleConfigBO> result = moduleConfigService.query(params);
         if (!result.isSuccess()) {
             return "/error/404";
@@ -63,6 +66,7 @@ public class ModuleConfigController {
 
     @RequestMapping("add.htm")
     public String add(Model model) {
+        model.addAttribute("currentPage", "config");
         RepeaterConfig defaultConf = new RepeaterConfig();
         List<Behavior> behaviors = Lists.newArrayList();
         defaultConf.setPluginIdentities(Lists.newArrayList( "http", "java-entrance", "java-subInvoke"));

@@ -135,30 +135,47 @@ public class I18nApi {
             "nav.online.traffic", "nav.config.management", "nav.online.module",
             // 页面标题
             "title.online.traffic", "title.config.management", "title.online.module",
-            "title.call.detail", "title.replay.result",
+            "title.call.detail", "title.replay.result", "title.config.add", "title.config.edit",
+            "title.config.detail", "title.module.list", "title.regress", "title.batch.replay",
             // 按钮
             "button.query", "button.add", "button.add.config", "button.edit",
             "button.delete", "button.detail", "button.replay", "button.execute",
             "button.cancel", "button.confirm", "button.submit", "button.save",
             "button.batch.replay", "button.push", "button.activate", "button.install.module",
-            "button.refresh",
+            "button.refresh", "button.active", "button.select.all", "button.back", "button.reset",
             // 表单标签
             "label.app.name", "label.environment", "label.trace.id", "label.machine",
             "label.ip", "label.entrance", "label.status", "label.time",
             "label.create.time", "label.modify.time", "label.heartbeat.time",
             "label.config.info", "label.operation", "label.host", "label.port",
             "label.version", "label.mock",
+            // 表格列头
+            "table.app.name", "table.environment", "table.entrance", "table.trace.id",
+            "table.status", "table.time", "table.operation", "table.config.info",
+            "table.create.time", "table.modify.time", "table.heartbeat.time",
+            "table.host", "table.port", "table.version", "table.machine", "table.select.all",
+            // 表单字段
+            "form.config.content", "form.config.model", "form.module.name", 
+            "form.ip.address", "form.machine.ip", "form.scenario.name",
+            // 状态信息
+            "status.active", "status.inactive", "status.online", "status.offline",
+            "status.success", "status.failed",
             // 提示信息
             "msg.no.config", "msg.no.machine", "msg.no.data", "msg.network.error",
             "msg.replay.success", "msg.loading", "msg.success", "msg.failed",
-            "msg.confirm.delete", "msg.confirm.operation",
+            "msg.confirm.delete", "msg.confirm.operation", "msg.no.data.recorded",
+            "msg.no.replay.machine", "msg.install.success", "msg.activate.success",
+            "msg.push.success", "msg.select.records.first", "msg.confirm.batch.replay",
+            "msg.install.module.confirm", "msg.activate.module.confirm",
             // 页面元素
-            "page.home", "page.breadcrumb", "page.new.badge",
+            "page.home", "page.breadcrumb", "page.new.badge", "page.call.list",
+            "page.recorded.data", "page.no.available.machine", "page.please.select.machine",
             // 模态框标题
             "modal.title.tip", "modal.title.start.replay", "modal.title.install.module",
-            "modal.title.confirm",
+            "modal.title.confirm", "modal.title.batch.replay", "modal.title.select.machine",
             // 其他
-            "other.open", "other.close", "other.yes", "other.no", "other.all", "other.none"
+            "other.open", "other.close", "other.yes", "other.no", "other.all", "other.none",
+            "other.loading", "other.processing"
         };
         
         for (String key : keys) {

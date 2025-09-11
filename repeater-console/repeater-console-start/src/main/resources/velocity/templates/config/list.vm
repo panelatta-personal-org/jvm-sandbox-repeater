@@ -1,91 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="shortcut icon" href="/favorite.ico" type="image/x-icon"/>
-    <link rel=”icon” href="/favorite.ico" type="image/x-icon"/>
-    <link rel="bookmark" href="/favorite.ico" type="image/x-icon"/>
-    <title>配置管理 - Repeater</title>
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- overlayScrollbars -->
-    <link rel="stylesheet" href="/dist/css/adminlte.min.css">
-    <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    #set($pageTitle = $i18n.get("title.config.management"))
+    #parse("blocks/html-head.vm")
 </head>
-<body class="hold-transition sidebar-mini ">
+<body class="hold-transition sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-dark">
-        <!-- Left navbar links -->
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
-            </li>
-        </ul>
+    #parse("blocks/navbar.vm")
 
-        <!-- Right navbar links -->
-        <ul class="navbar-nav ml-auto">
-        </ul>
-    </nav>
-    <!-- /.navbar -->
-
-    <!-- Main Sidebar Container -->
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <!-- Brand Logo -->
-        <a href="#" class="brand-link">
-            <img src="/dist/img/RepeaterLogo.ico"
-                 alt="AdminLTE Logo"
-                 class="brand-image img-circle elevation-3"
-                 style="opacity: .8">
-            <span class="brand-text font-weight-light">Phoenix</span>
-        </a>
-
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <!-- Sidebar Menu -->
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                    <!-- Add icons to the links using the .nav-icon class
-                         with font-awesome or any other icon font library -->
-                    <li class="nav-item">
-                        <a href="/online/search.htm"  class="nav-link">
-                            <i class="nav-icon fa fa-database"></i>
-                            <p>
-                                在线流量
-                                <span class="right badge badge-success">New</span>
-                            </p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#"  class="nav-link active">
-                            <i class="nav-icon fa fa-cogs"></i>
-                            <p>
-                                配置管理
-                            </p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/module/list.htm"  class="nav-link">
-                            <i class="nav-icon fa fa-heartbeat"></i>
-                            <p>
-                                在线模块
-                            </p>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <!-- /.sidebar-menu -->
-        </div>
-        <!-- /.sidebar -->
-    </aside>
+    #set($currentPage = "config")
+    #parse("blocks/sidebar.vm")
 
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -94,12 +19,12 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>配置管理</h1>
+                        <h1>$i18n.get("title.config.management")</h1>
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="#">首页</a></li>
-                            <li class="breadcrumb-item active">配置管理</li>
+                            <li class="breadcrumb-item"><a href="#">$i18n.get("page.home")</a></li>
+                            <li class="breadcrumb-item active">$i18n.get("title.config.management")</li>
                         </ol>
                     </div>
                 </div>
@@ -113,12 +38,12 @@
                     <div class="card card-blue card-outline">
                         <div class="card-header border-0">
                             <h5 class="card-title text-blue">
-                                配置管理 <i class="fa fa-cogs"></i>
+                                $i18n.get("title.config.management") <i class="fa fa-cogs"></i>
                             </h5>
                             <div class="card-tools">
                                 <a href="/config/add.htm" target="_blank" class="btn btn-primary btn-sm float-right"
-                                        data-loading-text="searching" >
-                                    新增配置
+                                        data-loading-text="searching">
+                                    $i18n.get("button.add.config")
                                 </a>
                             </div>
                         </div>
@@ -127,23 +52,23 @@
                                 <div class="col-lg-12">
                                     <form class="form-inline" method="get" action="list.htm">
                                         <div class="form-group" style="margin-left:10px">
-                                            <label for="appName">应用名:</label>
-                                            <input type="text" class="form-control" placeholder="appName" name="appName"
-                                                   value="$!requestParams.appName" autocomplete="off"
-                                                   data-toggle="tooltip"
-                                                   title="appName" style="width: 210px;margin-left:10px">
+                                            <label for="appName">$i18n.get("label.app.name"):</label>
+                                            <input type="text" class="form-control" placeholder="$i18n.get('label.app.name')" 
+                                                   name="appName" value="$!requestParams.appName" autocomplete="off"
+                                                   data-toggle="tooltip" title="$i18n.get('label.app.name')" 
+                                                   style="width: 210px;margin-left:10px">
                                         </div>
                                         <div class="form-group" style="margin-left: 10px">
-                                            <label for="TraceId">环境:</label>
-                                            <input type="text" class="form-control" placeholder="environment" name="environment"
-                                                   value="$!requestParams.environment" autocomplete="off"
-                                                   data-toggle="tooltip"
-                                                   title="environment" style="width: 210px;margin-left:10px">
+                                            <label for="environment">$i18n.get("label.environment"):</label>
+                                            <input type="text" class="form-control" placeholder="$i18n.get('label.environment')" 
+                                                   name="environment" value="$!requestParams.environment" autocomplete="off"
+                                                   data-toggle="tooltip" title="$i18n.get('label.environment')" 
+                                                   style="width: 210px;margin-left:10px">
                                         </div>
                                         <div class="form-group" style="margin-left: 20px">
                                             <button type="submit" class="btn btn-primary"
                                                     data-loading-text="searching" id="search-online-btn">
-                                                查询 <i class="fa fa-search icon-on-right bigger"></i>
+                                                $i18n.get("button.query") <i class="fa fa-search icon-on-right bigger"></i>
                                             </button>
                                         </div>
                                     </form>
@@ -153,12 +78,12 @@
                                 #if($pagerWrapper.content && $pagerWrapper.content.size() > 0)
                                     <thead>
                                     <tr>
-                                        <th>应用名</th>
-                                        <th>环境</th>
-                                        <th>配置信息</th>
-                                        <th>创建时间</th>
-                                        <th>修改时间</th>
-                                        <th width="150px">操作</th>
+                                        <th>$i18n.get("table.app.name")</th>
+                                        <th>$i18n.get("table.environment")</th>
+                                        <th>$i18n.get("form.config.model")</th>
+                                        <th>$i18n.get("table.create.time")</th>
+                                        <th>$i18n.get("table.modify.time")</th>
+                                        <th width="150px">$i18n.get("table.operation")</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -170,24 +95,26 @@
                                             <td style="vertical-align: middle">$!{data.gmtCreate}</td>
                                             <td style="vertical-align: middle">$!{data.gmtModified}</td>
                                             <td style="vertical-align: middle">
-                                                <a href="/config/detail.htm?appName=$!{data.appName}&environment=$!{data.environment}" class="btn btn-primary btn-xs " data-toggle="tooltip"
-                                                        title="详情" data-env="$!{data.environment}"
-                                                        data-app="$!{data.appName}">详情
+                                                <a href="/config/detail.htm?appName=$!{data.appName}&environment=$!{data.environment}" 
+                                                   class="btn btn-primary btn-xs" data-toggle="tooltip"
+                                                   title="$i18n.get('button.detail')" data-env="$!{data.environment}"
+                                                   data-app="$!{data.appName}">$i18n.get("button.detail")
                                                 </a>
-                                                <a href="/config/edit.htm?appName=$!{data.appName}&environment=$!{data.environment}" class="btn btn-info btn-xs " data-toggle="tooltip"
-                                                   title="编辑" data-env="$!{data.environment}"
-                                                   data-app="$!{data.appName}">编辑
+                                                <a href="/config/edit.htm?appName=$!{data.appName}&environment=$!{data.environment}" 
+                                                   class="btn btn-info btn-xs" data-toggle="tooltip"
+                                                   title="$i18n.get('button.edit')" data-env="$!{data.environment}"
+                                                   data-app="$!{data.appName}">$i18n.get("button.edit")
                                                 </a>
                                                 <button class="btn btn-success btn-xs btn-push" data-toggle="tooltip"
-                                                        title="推送" data-env="$!{data.environment}"
-                                                        data-app="$!{data.appName}">推送
+                                                        title="$i18n.get('button.push')" data-env="$!{data.environment}"
+                                                        data-app="$!{data.appName}">$i18n.get("button.push")
                                                 </button>
                                             </td>
                                         </tr>
                                         #end
                                     </tbody>
                                 #else
-                                    <h5 style="padding-left: 10px;margin-top: 20px"> 没有配置信息</h5>
+                                    <h5 style="padding-left: 10px;margin-top: 20px">$i18n.get("msg.no.config")</h5>
                                 #end
                             </table>
                         </div>
@@ -199,33 +126,13 @@
     </div>
     <!-- /.content-wrapper -->
 
-    <footer class="main-footer">
-        <div class="float-right d-none d-sm-block">
-            <b>Version</b> 3.0.1
-        </div>
-        <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
-        reserved.
-    </footer>
-
-    <!-- Control Sidebar -->
-    <aside class="control-sidebar control-sidebar-dark">
-        <!-- Control sidebar content goes here -->
-    </aside>
-    <!-- /.control-sidebar -->
+    #parse("blocks/footer.vm")
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery -->
-<script src="/plugins/jquery/jquery.min.js"></script>
-<!-- Bootstrap 4 -->
-<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-<!-- AdminLTE App -->
-<script src="/dist/js/adminlte.min.js"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="/dist/js/demo.js"></script>
-    #parse("blocks/fakeloader.vm")
+#parse("blocks/header-scripts.vm")
+#parse("blocks/fakeloader.vm")
 
-<script src="/app/js/app.js" charset="UTF-8"></script>
 <script type="application/javascript">
     jQuery(function ($) {
         $(".btn-push").on('click', function () {
@@ -241,7 +148,7 @@
                 },
                 success: function (res) {
                     hideLoading(10)
-                    notice(res.message, notice.success)
+                    notice(res.message, res.success)
                 },
                 dataType: 'json',
                 error: function (XMLHttpRequest) {

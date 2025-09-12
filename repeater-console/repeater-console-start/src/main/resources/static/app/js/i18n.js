@@ -99,14 +99,15 @@ var i18n = {
     switchLocale: function(locale) {
         if (locale && locale !== this.locale) {
             this.setLocaleToCookie(locale);
-            // 通过URL参数切换语言并刷新页面
-            var url = window.location.href;
-            var separator = url.indexOf('?') !== -1 ? '&' : '?';
             
-            // 移除已存在的lang参数
+            // 获取当前URL，移除现有的lang参数
+            var url = window.location.href;
             url = url.replace(/[?&]lang=[^&]*/g, '');
             
-            // 添加新的lang参数
+            // 重新判断分隔符：移除lang参数后，如果URL中仍有其他参数则用&，否则用?
+            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+            
+            // 添加新的lang参数并跳转
             window.location.href = url + separator + 'lang=' + locale;
         }
     },

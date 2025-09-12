@@ -57,6 +57,12 @@
 
     <dependencyManagement>
         <dependencies>
+	    <dependency>
+  <groupId>com.h2database</groupId>
+  <artifactId>h2</artifactId>
+  <version>1.4.196</version>
+  <scope>runtime</scope>
+</dependency>
             <!-- = = = = = = = = ==-->
             <!-- self dependencies -->
             <dependency>
@@ -93,6 +99,11 @@
                 <artifactId>transmittable-thread-local</artifactId>
                 <version>${ttl.version}</version>
             </dependency>
+	    <dependency>
+  		<groupId>com.h2database</groupId>
+  		<artifactId>h2</artifactId>
+  		<scope>runtime</scope>
+	    </dependency>
             <!-- logger -->
             <dependency>
                 <groupId>org.slf4j</groupId>

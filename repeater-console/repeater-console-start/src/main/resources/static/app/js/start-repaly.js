@@ -21,7 +21,7 @@ jQuery(function ($) {
             sSelect.empty();
             if (response.success && response.data.length > 0) {
                 jQuery.each(response.data, function (i, val) {
-                    var version = (val.version === '-' ? '' : ' 版本:' + val.version);
+                    var version = (val.version === '-' ? '' : ' ' + i18n.get("other.version") + ':' + val.version);
                     if (i === 0) {
                         sSelect.append('<option value="' + val.ip + '" selected>' + val.ip + '[' + val.environment + version + ']' + '</option>')
                     } else {

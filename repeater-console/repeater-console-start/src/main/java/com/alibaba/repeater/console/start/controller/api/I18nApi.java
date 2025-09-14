@@ -173,9 +173,33 @@ public class I18nApi {
             // 模态框标题
             "modal.title.tip", "modal.title.start.replay", "modal.title.install.module",
             "modal.title.confirm", "modal.title.batch.replay", "modal.title.select.machine",
+            // 回放页面相关
+            "page.replay.snapshot", "page.replay.result", "page.diff.nodes", "page.result.diff",
+            "page.mock.process", "page.expected.result", "page.actual.result",
+            "page.basic.info", "page.call.info", "page.request.params", "page.response.result",
+            "page.sub.invocations", "page.record.machine", "page.record.time", "page.record.environment",
+            "page.config.info", "page.config.help",
+            // 回放状态
+            "status.executing", "status.activated", "status.unactivated", "status.frozen",
+            // 回放专用表格标题
+            "table.execution.result", "table.execution.time", "table.execution.environment",
+            "table.execution.machine", "table.repeat.id", "table.execution.datetime",
+            "table.node", "table.expected.value", "table.actual.value", "table.reason",
+            "table.sequence", "table.record.identity", "table.replay.identity",
+            "table.record.params", "table.replay.params", "table.cost", "table.skip",
+            // 回放专用模态框
+            "modal.no.replay.machine", "modal.machine.label", "modal.mock.label",
+            "modal.mock.on", "modal.mock.off",
+            // 回放页面面包屑
+            "breadcrumb.call.detail", "breadcrumb.replay.result",
+            // 模块管理相关
+            "module.heartbeat.info", "module.no.heartbeat", "module.freeze", "module.reload",
+            "module.reload.plugin",
+            // 验证信息
+            "validation.app.name.required", "validation.environment.required",
             // 其他
-            "other.open", "other.close", "other.yes", "other.no", "other.all", "other.none",
-            "other.loading", "other.processing"
+            "other.version", "other.open", "other.close", "other.yes", "other.no", "other.all", "other.none",
+            "other.loading", "other.processing", "msg.no.diff.nodes", "msg.no.mock.process"
         };
         
         for (String key : keys) {

@@ -1,4 +1,4 @@
-.PHONY: build-console run-console-h2 debug-console-h2
+.PHONY: build-console run-console-h2 debug-console-h2 run-console debug-console
 
 build-console:
 	mvn -pl repeater-console/repeater-console-start -am clean package -DskipTests

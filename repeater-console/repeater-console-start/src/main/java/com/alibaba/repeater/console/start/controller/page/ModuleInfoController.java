@@ -2,6 +2,7 @@ package com.alibaba.repeater.console.start.controller.page;
 
 import com.alibaba.jvm.sandbox.repeater.plugin.domain.RepeaterResult;
 import com.alibaba.repeater.console.common.domain.ModuleInfoBO;
+import com.alibaba.repeater.console.common.domain.ModuleStatusDetail;
 import com.alibaba.repeater.console.common.domain.PageResult;
 import com.alibaba.repeater.console.common.params.ModuleInfoParams;
 import com.alibaba.repeater.console.service.ModuleInfoService;
@@ -78,5 +79,11 @@ public class ModuleInfoController {
     @RequestMapping("/remove.json")
     public RepeaterResult<String> remove(@ModelAttribute("requestParams") ModuleInfoParams params) {
         return moduleInfoService.remove(params);
+    }
+
+    @ResponseBody
+    @RequestMapping("/status.json")
+    public RepeaterResult<ModuleStatusDetail> getModuleStatus(@ModelAttribute("requestParams") ModuleInfoParams params) {
+        return ((com.alibaba.repeater.console.service.impl.ModuleInfoServiceImpl) moduleInfoService).getModuleStatus(params);
     }
 }

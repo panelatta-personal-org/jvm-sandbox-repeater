@@ -4,6 +4,7 @@ import com.alibaba.jvm.sandbox.repeater.plugin.core.util.HttpUtil;
 import com.alibaba.jvm.sandbox.repeater.plugin.domain.RepeaterResult;
 import com.alibaba.repeater.console.common.domain.ModuleInfoBO;
 import com.alibaba.repeater.console.common.domain.ModuleStatus;
+import com.alibaba.repeater.console.common.domain.ModuleStatusDetail;
 import com.alibaba.repeater.console.common.domain.PageResult;
 import com.alibaba.repeater.console.common.params.ModuleInfoParams;
 import com.alibaba.repeater.console.dal.dao.ModuleInfoDao;
@@ -96,11 +97,28 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
 
     @Override
     public RepeaterResult<ModuleInfoBO> report(ModuleInfoBO params) {
-        ModuleInfo moduleInfo = moduleInfoConverter.reconvert(params);
-        moduleInfo.setGmtModified(new Date());
-        moduleInfo.setGmtCreate(new Date());
-        moduleInfoDao.save(moduleInfo);
-        return ResultHelper.success(moduleInfoConverter.convert(moduleInfo));
+        // 查找已存在的模块
+        ModuleInfo existingModule = moduleInfoDao.findByAppNameAndIp(params.getAppName(), params.getIp());
+        if (existingModule != null) {
+            // 只更新心跳时间，不更新创建时间
+            existingModule.setGmtModified(new Date());
+            if (params.getStatus() != null) {
+                existingModule.setStatus(params.getStatus().name());
+            }
+            // 如果有版本信息，更新版本
+            if (params.getVersion() != null && !params.getVersion().isEmpty()) {
+                existingModule.setVersion(params.getVersion());
+            }
+            moduleInfoDao.saveAndFlush(existingModule);
+            return ResultHelper.success(moduleInfoConverter.convert(existingModule));
+        } else {
+            // 新模块，设置创建时间和心跳时间
+            ModuleInfo moduleInfo = moduleInfoConverter.reconvert(params);
+            moduleInfo.setGmtCreate(new Date());
+            moduleInfo.setGmtModified(new Date());
+            moduleInfoDao.save(moduleInfo);
+            return ResultHelper.success(moduleInfoConverter.convert(moduleInfo));
+        }
     }
 
     @Override
@@ -192,10 +210,105 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
     public RepeaterResult<String> reload(ModuleInfoParams params) {
         ModuleInfo moduleInfo = moduleInfoDao.findByAppNameAndIp(params.getAppName(), params.getIp());
         if (moduleInfo == null) {
-            return ResultHelper.fail("data not exist");
+            return ResultHelper.fail(getMessage("error.module.not.found"));
         }
-        HttpUtil.Resp resp = HttpUtil.doGet(String.format(reloadURI, moduleInfo.getIp(), moduleInfo.getPort()));
-        return ResultHelper.fs(resp.isSuccess());
+        
+        long startTime = System.currentTimeMillis();
+        String reloadUrl = String.format(reloadURI, moduleInfo.getIp(), moduleInfo.getPort());
+        
+        try {
+            HttpUtil.Resp resp = HttpUtil.doGet(reloadUrl);
+            long responseTime = System.currentTimeMillis() - startTime;
+            
+            if (resp.isSuccess()) {
+                // 1. 更新reload时间
+                moduleInfo.setGmtModified(new Date());
+                moduleInfoDao.saveAndFlush(moduleInfo);
+                
+                // 2. 验证reload后的模块状态
+                boolean moduleActive = verifyModuleStatus(moduleInfo.getIp(), moduleInfo.getPort());
+                
+                return ResultHelper.success(
+                    getMessage("success.module.reloaded", responseTime),
+                    String.format("模块reload成功，响应时间: %dms，状态: %s", 
+                        responseTime, moduleActive ? "正常" : "异常")
+                );
+            } else {
+                return ResultHelper.fail(
+                    getMessage("error.reload.failed", resp.getMessage())
+                );
+            }
+        } catch (Exception e) {
+            return ResultHelper.fail(
+                getMessage("error.reload.exception", e.getMessage())
+            );
+        }
+    }
+
+    /**
+     * 验证模块状态
+     */
+    private boolean verifyModuleStatus(String ip, String port) {
+        try {
+            String statusUrl = String.format("http://%s:%s/sandbox/default/module/http/sandbox-module-mgr/detail?id=repeater", ip, port);
+            HttpUtil.Resp resp = HttpUtil.doGet(statusUrl);
+            return resp.isSuccess() && resp.getBody().contains("ACTIVE");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 获取模块详细状态
+     */
+    public RepeaterResult<ModuleStatusDetail> getModuleStatus(ModuleInfoParams params) {
+        ModuleInfo moduleInfo = moduleInfoDao.findByAppNameAndIp(params.getAppName(), params.getIp());
+        if (moduleInfo == null) {
+            return ResultHelper.fail(getMessage("error.module.not.found"));
+        }
+        
+        ModuleStatusDetail status = new ModuleStatusDetail();
+        status.setLastHeartbeat(moduleInfo.getGmtModified());
+        long startTime = System.currentTimeMillis();
+        
+        try {
+            // 检测连接状态
+            String pingUrl = String.format("http://%s:%s/sandbox/default/module/http/sandbox-module-mgr/list", 
+                                         moduleInfo.getIp(), moduleInfo.getPort());
+            HttpUtil.Resp resp = HttpUtil.doGet(pingUrl);
+            
+            status.setOnline(resp.isSuccess());
+            status.setResponseTime(System.currentTimeMillis() - startTime);
+            
+            if (resp.isSuccess()) {
+                // 获取详细状态信息
+                String detailUrl = String.format("http://%s:%s/sandbox/default/module/http/sandbox-module-mgr/detail?id=repeater", 
+                                                moduleInfo.getIp(), moduleInfo.getPort());
+                HttpUtil.Resp detailResp = HttpUtil.doGet(detailUrl);
+                if (detailResp.isSuccess()) {
+                    status.setModuleActive(detailResp.getBody().contains("ACTIVE"));
+                    status.setModuleDetail(detailResp.getBody());
+                } else {
+                    status.setModuleActive(false);
+                }
+                
+                // 重置失败计数
+                status.setFailureCount(0);
+            } else {
+                status.setModuleActive(false);
+                status.setError(resp.getMessage());
+                status.setFailureCount(1);
+            }
+            
+            return ResultHelper.success(status);
+        } catch (Exception e) {
+            status.setOnline(false);
+            status.setModuleActive(false);
+            status.setError(e.getMessage());
+            status.setFailureCount(1);
+            status.setResponseTime(System.currentTimeMillis() - startTime);
+            return ResultHelper.success(status);
+        }
     }
 
     private RepeaterResult<ModuleInfoBO> execute(String uri, ModuleInfoParams params, ModuleStatus finishStatus) {

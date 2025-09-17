@@ -73,6 +73,63 @@
             border-radius: 3px;
             transition: width 0.3s ease;
         }
+        
+        /* 状态指示器样式 */
+        .status-indicators {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .status-indicators .fa-circle {
+            font-size: 10px;
+            margin-right: 3px;
+        }
+        
+        /* 操作进度显示 */
+        .operation-progress {
+            margin-top: 5px;
+            font-size: 11px;
+        }
+        
+        .operation-progress .progress {
+            height: 3px;
+            margin-bottom: 2px;
+        }
+        
+        /* 连接状态颜色 */
+        .status-fast { color: #28a745; }
+        .status-normal { color: #ffc107; }
+        .status-slow { color: #dc3545; }
+        .status-offline { color: #6c757d; }
+        
+        /* 操作按钮状态 */
+        .btn-operation {
+            margin-right: 3px;
+            margin-bottom: 3px;
+        }
+        
+        .btn-operation:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 详细错误信息模态框 */
+        .error-detail-modal .modal-body {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .error-detail-content {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 <body class="hold-transition sidebar-mini">
@@ -112,6 +169,18 @@
                                 $i18n.get("title.module.list") <i class="fa fa-heartbeat"></i>
                             </h5>
                             <div class="card-tools">
+                                <div class="btn-group float-right" role="group" style="margin-right: 10px;">
+                                    <button id="btn-refresh-status" type="button" class="btn btn-info btn-sm" 
+                                            title="手动刷新所有模块状态" onclick="refreshAllStatus()">
+                                        <i class="fa fa-refresh"></i>
+                                        刷新状态
+                                    </button>
+                                    <button id="btn-toggle-monitor" type="button" class="btn btn-success btn-sm" 
+                                            title="开启/关闭自动状态监控" onclick="toggleMonitorButton()">
+                                        <i class="fa fa-play"></i>
+                                        <span id="monitor-status-text">监控中</span>
+                                    </button>
+                                </div>
                                 <button type="button" class="btn btn-primary btn-sm float-right"
                                         data-loading-text="searching" id="btn-install">
                                     $i18n.get("button.install.module")
@@ -155,13 +224,14 @@
                                         <th>$i18n.get("table.port")</th>
                                         <th>$i18n.get("table.version")</th>
                                         <th>$i18n.get("label.status")</th>
+                                        <th>连接状态</th>
                                         <th>$i18n.get("label.heartbeat.time")</th>
-                                        <th width="100px">$i18n.get("table.operation")</th>
+                                        <th width="120px">$i18n.get("table.operation")</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                         #foreach($data in $pagerWrapper.content)
-                                        <tr>
+                                        <tr class="module-row" data-app="$!{data.appName}" data-ip="$!{data.ip}" data-port="$!{data.port}">
                                             <td style="vertical-align: middle">$!data.appName</td>
                                             <td style="vertical-align: middle">$!{data.environment}</td>
                                             <td style="vertical-align: middle">$!data.ip</td>
@@ -173,6 +243,13 @@
                                                 #else
                                                     <span class="badge badge-warning">$i18n.get("status.unactivated")</span>
                                                 #end
+                                            </td>
+                                            <td style="vertical-align: middle">
+                                                <div class="status-indicators">
+                                                    <i class="fa fa-circle text-muted" title="未检测"></i>
+                                                    <span class="badge badge-secondary">待检测</span>
+                                                </div>
+                                                <div class="operation-status"></div>
                                             </td>
                                             <td style="vertical-align: middle">$!{data.gmtModified}</td>
                                             <td style="vertical-align: middle">
@@ -247,15 +324,35 @@
             });
         })
         
-        $(".btn-reload").on('click',function () {
-            var appName = $(this).attr('data-app');
-            var ip = $(this).attr('data-ip');
-            innerPost("/module/reload.json", {'appName': appName,'ip':ip}, function (response) {
+        $(".btn-reload").on('click', function () {
+            var $btn = $(this);
+            var $row = $btn.closest('tr');
+            var appName = $btn.attr('data-app');
+            var ip = $btn.attr('data-ip');
+            
+            // 1. 设置按钮加载状态
+            setButtonLoading($btn, true, 'reloading');
+            showOperationProgress($row, 'reload');
+            
+            // 2. 执行reload
+            innerPost("/module/reload.json", {'appName': appName, 'ip': ip}, function (response) {
+                setButtonLoading($btn, false);
+                hideOperationProgress($row);
+                
                 if (response.success) {
-                    notice(response.message, response.success)
-                    setTimeout('window.location.reload()', 1000)
+                    // 成功：显示成功信息并更新状态
+                    showSuccess(response.message, response.data);
+                    updateModuleStatus($row, 'reload-success');
+                    
+                    // 3秒后验证模块状态
+                    setTimeout(function() {
+                        verifyModuleStatus(appName, ip, $row);
+                    }, 3000);
+                    
                 } else {
-                    notice(response.message, response.success)
+                    // 失败：显示详细错误信息
+                    showError(i18n.get('operation.reload.failed'), response.message, response.data);
+                    updateModuleStatus($row, 'reload-failed');
                 }
             });
         })
@@ -746,6 +843,353 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
             i18n.debug = false;
             console.log('调试模式已关闭');
         };
+        
+        // 按钮状态管理函数
+        function setButtonLoading($btn, loading, operation) {
+            if (loading) {
+                var loadingText = '';
+                switch(operation) {
+                    case 'reloading':
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.reloading');
+                        break;
+                    case 'checking':
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.checking');
+                        break;
+                    default:
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+                }
+                
+                $btn.prop('disabled', true)
+                    .data('original-html', $btn.html())
+                    .html(loadingText)
+                    .addClass('btn-loading');
+            } else {
+                $btn.prop('disabled', false)
+                    .html($btn.data('original-html') || $btn.html())
+                    .removeClass('btn-loading');
+            }
+        }
+
+        function showOperationProgress($row, operation) {
+            var operationText = '';
+            switch(operation) {
+                case 'reload':
+                    operationText = i18n.get('operation.reloading');
+                    break;
+                case 'checking':
+                    operationText = i18n.get('operation.checking.status');
+                    break;
+                default:
+                    operationText = '处理中...';
+            }
+            
+            var progressHtml = `
+                <div class="operation-progress">
+                    <div class="progress" style="height: 4px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                             style="width: 100%"></div>
+                    </div>
+                    <small class="text-muted">${operationText}</small>
+                </div>
+            `;
+            $row.find('.operation-status').html(progressHtml);
+        }
+
+        function hideOperationProgress($row) {
+            $row.find('.operation-status').empty();
+        }
+
+        function updateModuleStatus($row, status) {
+            var $indicators = $row.find('.status-indicators');
+            var statusHtml = '';
+            
+            switch(status) {
+                case 'reload-success':
+                    statusHtml = `
+                        <i class="fa fa-circle text-success" title="最近reload成功"></i>
+                        <span class="badge badge-success">${i18n.get('operation.reload.success')}</span>
+                    `;
+                    break;
+                case 'reload-failed':
+                    statusHtml = `
+                        <i class="fa fa-circle text-danger" title="reload失败"></i>
+                        <span class="badge badge-danger">${i18n.get('operation.reload.failed')}</span>
+                    `;
+                    break;
+                case 'checking':
+                    statusHtml = `
+                        <i class="fa fa-circle text-warning" title="检测中"></i>
+                        <span class="badge badge-warning">${i18n.get('status.checking')}</span>
+                    `;
+                    break;
+                default:
+                    statusHtml = `
+                        <i class="fa fa-circle text-muted" title="未检测"></i>
+                        <span class="badge badge-secondary">待检测</span>
+                    `;
+            }
+            
+            $indicators.html(statusHtml);
+        }
+
+        function verifyModuleStatus(appName, ip, $row) {
+            updateModuleStatus($row, 'checking');
+            
+            $.get("/module/status.json", {appName: appName, ip: ip})
+                .done(function(response) {
+                    if (response.success) {
+                        updateModuleStatusDisplay($row, response.data);
+                    } else {
+                        updateModuleStatus($row, 'reload-failed');
+                    }
+                })
+                .fail(function() {
+                    updateModuleStatus($row, 'reload-failed');
+                });
+        }
+
+        function updateModuleStatusDisplay($row, statusData) {
+            var statusHtml = '';
+            
+            // 连接状态指示灯
+            if (statusData.online) {
+                var colorClass = statusData.responseTime < 1000 ? 'text-success' : 
+                                statusData.responseTime < 3000 ? 'text-warning' : 'text-danger';
+                statusHtml += `<i class="fa fa-circle ${colorClass}" 
+                                  title="${i18n.get('status.online')} (${statusData.responseTime}ms)"></i> `;
+            } else {
+                statusHtml += `<i class="fa fa-circle text-muted" title="${i18n.get('status.offline')}"></i> `;
+            }
+            
+            // 模块状态
+            if (statusData.moduleActive) {
+                statusHtml += `<span class="badge badge-success">${i18n.get('status.active')}</span>`;
+            } else {
+                statusHtml += `<span class="badge badge-danger">${i18n.get('status.inactive')}</span>`;
+            }
+            
+            // 响应时间
+            if (statusData.responseTime) {
+                statusHtml += ` <small class="text-muted">${statusData.responseTime}ms</small>`;
+            }
+            
+            $row.find('.status-indicators').html(statusHtml);
+        }
+
+        function showSuccess(message, detail) {
+            if (detail) {
+                $("#success-message-area").html(`
+                    <strong>${message}</strong><br>
+                    <small class="text-muted">${detail}</small>
+                `);
+            } else {
+                $("#success-message-area").html(message);
+            }
+            $("#success-modal").modal('show');
+        }
+
+        function showError(title, message, detail) {
+            var errorContent = `<strong>${title}</strong><br>${message}`;
+            if (detail) {
+                errorContent += `<br><br><div class="error-detail-content">${detail}</div>`;
+            }
+            $("#danger-message-area").html(errorContent);
+            $("#danger-modal").modal('show');
+        }
+        
+        // 实时状态监控功能
+        var statusMonitorInterval;
+        var isMonitoringEnabled = true;
+        
+        function startStatusMonitoring() {
+            if (!isMonitoringEnabled) return;
+            
+            // 立即检测一次
+            checkAllModuleStatus();
+            
+            // 每30秒自动检测
+            statusMonitorInterval = setInterval(function() {
+                if (isMonitoringEnabled && $('.module-row').length > 0) {
+                    checkAllModuleStatus();
+                }
+            }, 30000);
+            
+            console.log('🔄 模块状态监控已启动，每30秒自动检测');
+        }
+        
+        function stopStatusMonitoring() {
+            isMonitoringEnabled = false;
+            if (statusMonitorInterval) {
+                clearInterval(statusMonitorInterval);
+                statusMonitorInterval = null;
+            }
+            console.log('⏹ 模块状态监控已停止');
+        }
+        
+        function checkAllModuleStatus() {
+            console.log('🔍 开始检测所有模块状态...');
+            var $rows = $('.module-row');
+            
+            if ($rows.length === 0) {
+                console.log('📭 没有发现模块，跳过检测');
+                return;
+            }
+            
+            $rows.each(function(index) {
+                var $row = $(this);
+                var appName = $row.data('app');
+                var ip = $row.data('ip');
+                
+                if (!appName || !ip) {
+                    console.warn('⚠️ 模块信息不完整，跳过:', $row.get(0));
+                    return;
+                }
+                
+                // 延迟检测，避免同时发起太多请求
+                setTimeout(function() {
+                    checkSingleModuleStatus(appName, ip, $row);
+                }, index * 200);
+            });
+        }
+        
+        function checkSingleModuleStatus(appName, ip, $row) {
+            // 标记正在检测
+            var $indicators = $row.find('.status-indicators');
+            $indicators.find('.fa-circle').removeClass('text-success text-warning text-danger text-muted')
+                      .addClass('text-info')
+                      .attr('title', '检测中...');
+            
+            $.get("/module/status.json", {appName: appName, ip: ip})
+                .done(function(response) {
+                    if (response.success) {
+                        updateModuleStatusDisplay($row, response.data);
+                        updateHeartbeatTime($row, response.data.lastHeartbeat);
+                        
+                        // 记录检测结果
+                        var status = response.data.online ? '在线' : '离线';
+                        var moduleStatus = response.data.moduleActive ? '运行中' : '异常';
+                        console.log(`✅ ${appName}@${ip}: ${status}, ${moduleStatus}, ${response.data.responseTime}ms`);
+                    } else {
+                        updateModuleStatusOffline($row, response.message);
+                        console.log(`❌ ${appName}@${ip}: 检测失败 - ${response.message}`);
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    updateModuleStatusOffline($row, `网络错误: ${error}`);
+                    console.log(`🔌 ${appName}@${ip}: 网络异常 - ${error}`);
+                });
+        }
+        
+        function updateModuleStatusOffline($row, error) {
+            var statusHtml = `
+                <i class="fa fa-circle text-danger" title="连接失败: ${error}"></i>
+                <span class="badge badge-danger">${i18n.get('status.offline')}</span>
+            `;
+            $row.find('.status-indicators').html(statusHtml);
+        }
+        
+        function updateHeartbeatTime($row, lastHeartbeat) {
+            if (lastHeartbeat) {
+                var heartbeatCell = $row.find('td').eq(7); // 心跳时间列
+                heartbeatCell.text(lastHeartbeat);
+            }
+        }
+        
+        // 手动刷新所有状态
+        function refreshAllStatus() {
+            checkAllModuleStatus();
+            notice('正在刷新所有模块状态...', true);
+        }
+        
+        // 切换监控开关
+        function toggleStatusMonitoring() {
+            if (isMonitoringEnabled) {
+                stopStatusMonitoring();
+                return false;
+            } else {
+                isMonitoringEnabled = true;
+                startStatusMonitoring();
+                return true;
+            }
+        }
+        
+        // 导出调试函数到全局
+        window.moduleStatusMonitor = {
+            start: startStatusMonitoring,
+            stop: stopStatusMonitoring,
+            toggle: toggleStatusMonitoring,
+            refresh: refreshAllStatus,
+            checkAll: checkAllModuleStatus,
+            isEnabled: function() { return isMonitoringEnabled; }
+        };
+        
+        // 监控按钮控制函数
+        window.toggleMonitorButton = function() {
+            var enabled = toggleStatusMonitoring();
+            var $btn = $('#btn-toggle-monitor');
+            var $text = $('#monitor-status-text');
+            var $icon = $btn.find('i');
+            
+            if (enabled) {
+                $btn.removeClass('btn-secondary').addClass('btn-success');
+                $icon.removeClass('fa-play').addClass('fa-pause');
+                $text.text('监控中');
+                $btn.attr('title', '点击暂停自动状态监控');
+            } else {
+                $btn.removeClass('btn-success').addClass('btn-secondary');
+                $icon.removeClass('fa-pause').addClass('fa-play');
+                $text.text('已暂停');
+                $btn.attr('title', '点击启动自动状态监控');
+            }
+            
+            notice(enabled ? '状态监控已启动' : '状态监控已暂停', true);
+        };
+        
+        // 刷新状态按钮控制函数  
+        window.refreshAllStatus = function() {
+            var $btn = $('#btn-refresh-status');
+            var $icon = $btn.find('i');
+            
+            // 设置按钮为加载状态
+            $btn.prop('disabled', true);
+            $icon.addClass('fa-spin');
+            
+            checkAllModuleStatus();
+            
+            // 2秒后恢复按钮状态
+            setTimeout(function() {
+                $btn.prop('disabled', false);
+                $icon.removeClass('fa-spin');
+                notice('模块状态已刷新', true);
+            }, 2000);
+        };
+        
+        // 页面加载完成后启动监控
+        setTimeout(function() {
+            console.log('🚀 页面加载完成，启动模块状态监控...');
+            startStatusMonitoring();
+        }, 1000);
+        
+        // 页面离开时停止监控
+        $(window).on('beforeunload', function() {
+            stopStatusMonitoring();
+        });
+        
+        // 页面隐藏/显示时控制监控
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('📱 页面已隐藏，暂停状态监控');
+                if (statusMonitorInterval) {
+                    clearInterval(statusMonitorInterval);
+                }
+            } else {
+                console.log('👀 页面已显示，恢复状态监控');
+                if (isMonitoringEnabled) {
+                    startStatusMonitoring();
+                }
+            }
+        });
+        
     });
 </script>
 </body>

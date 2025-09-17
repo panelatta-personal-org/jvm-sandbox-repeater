@@ -492,7 +492,7 @@
         }
         
         // 详细的匹配表
-        if (data.details &amp;&amp; data.details.length > 0) {
+        if (data.details && data.details.length > 0) {
             html += '<h5>📋 详细匹配情况</h5>';
             html += '<table class="table table-sm table-striped">' +
                 '<thead>' +

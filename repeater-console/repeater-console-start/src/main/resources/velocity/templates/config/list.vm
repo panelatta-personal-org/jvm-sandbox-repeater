@@ -215,13 +215,13 @@
         // ==================== 方案1：Config推送调试面板函数 ====================
         
         window.toggleConfigDebugPanel = function() {
-            var jqpanel = jq('#config-debug-panel');
-            if (jqpanel.is(':visible')) {
-                jqpanel.hide();
+            var panel = jq('#config-debug-panel');
+            if (panel.is(':visible')) {
+                panel.hide();
             } else {
-                jqpanel.show();
-                if (jqpanel.hasClass('collapsed-card')) {
-                    jqpanel.find('[data-card-widget="collapse"]').click();
+                panel.show();
+                if (panel.hasClass('collapsed-card')) {
+                    panel.find('[data-card-widget="collapse"]').click();
                 }
             }
         };
@@ -387,20 +387,15 @@
             jq('#module-match-display').html('<p class=\"text-muted\">显示匹配的模块列表</p>');
         };
         
-    })
-</script>
-
-<!-- 方案2：Environment检查器JavaScript -->
-<script type="application/javascript">
-    // ==================== 方案2：Environment一致性检查器函数 ====================
-    
-    window.openEnvironmentChecker = function() {
-        if (!jq('#environment-checker-modal').length) {
-            createEnvironmentCheckerModal();
-        }
-        jq('#environment-checker-modal').modal('show');
-        runEnvironmentCheck();
-    };
+        // ==================== 方案2：Environment一致性检查器函数 ====================
+        
+        window.openEnvironmentChecker = function() {
+            if (!jq('#environment-checker-modal').length) {
+                createEnvironmentCheckerModal();
+            }
+            jq('#environment-checker-modal').modal('show');
+            runEnvironmentCheck();
+        };
     
     function createEnvironmentCheckerModal() {
         var modalHtml = '<div class="modal fade" id="environment-checker-modal" tabindex="-1">' +
@@ -533,6 +528,8 @@
             });
         }
     };
+        
+    })
 </script>
 
 <!-- 调试面板样式 -->

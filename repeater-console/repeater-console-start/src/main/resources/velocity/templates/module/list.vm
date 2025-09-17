@@ -370,9 +370,9 @@
             modal.find("select[name='environment']").val('default');
             
             modal.on('shown.bs.modal', function () {
-                $(this).css('display', 'block');
-                var modalHeight = $(window).height() / 2 - $('#start-install-modal .modal-dialog').height() / 2;
-                $(this).find('.modal-dialog').css({
+                jq(this).css('display', 'block');
+                var modalHeight = jq(window).height() / 2 - jq('#start-install-modal .modal-dialog').height() / 2;
+                jq(this).find('.modal-dialog').css({
                     'margin-top': modalHeight
                 });
                 // 聚焦到第一个输入框
@@ -382,13 +382,13 @@
         })
 
         // 定义按钮状态管理函数
-        function setButtonLoading($button, isLoading) {
+        function setButtonLoading(button, isLoading) {
             if (isLoading) {
-                $button.prop('disabled', true)
+                button.prop('disabled', true)
                        .html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.registering'))
                        .addClass('btn-loading');
             } else {
-                $button.prop('disabled', false)
+                button.prop('disabled', false)
                        .html(i18n.get('button.register.module'))
                        .removeClass('btn-loading');
             }
@@ -507,16 +507,16 @@
             });
             
             // 模态框关闭时清理
-            $('#retry-modal').on('hidden.bs.modal', function() {
-                $(this).remove();
+            jq('#retry-modal').on('hidden.bs.modal', function() {
+                jq(this).remove();
             });
         }
 
-        $("#start-install-btn").on('click', function () {
-            var $button = $(this);
+        jq("#start-install-btn").on('click', function () {
+            var button = jq(this);
             
             // 限制选择器在模态框内部，避免与页面其他元素冲突
-            var modal = $('#start-install-modal');
+            var modal = jq('#start-install-modal');
             var appName = modal.find("input[name='appName']").val();
             var ip = modal.find("input[name='ip']").val();
             var port = modal.find("input[name='port']").val();
@@ -566,7 +566,7 @@
             }
             
             // 立即设置按钮为loading状态并显示模态框遮罩
-            setButtonLoading($button, true);
+            setButtonLoading(button, true);
             showModalLoading();
             showLoading(300);
             
@@ -585,20 +585,20 @@
             requestTimeout = setTimeout(function() {
                 clearInterval(progressInterval);
                 cancelRequest('timeout');
-                setButtonLoading($button, false);
+                setButtonLoading(button, false);
             }, maxWaitTime);
             
             // 发送AJAX请求
-            currentXHR = $("#startInstallForm").ajaxSubmit({
+            currentXHR = jq("#startInstallForm").ajaxSubmit({
                 type: "post",
                 url: "//" + host + "/module/install.json",
                 success: function (data) {
                     clearInterval(progressInterval);
                     clearTimeout(requestTimeout);
-                    setButtonLoading($button, false);
+                    setButtonLoading(button, false);
                     hideModalLoading();
                     hideLoading(10);
-                    $("#start-install-modal").modal('hide');
+                    jq("#start-install-modal").modal('hide');
                     
                     if (data.success) {
                         notice(data.message, data.success);
@@ -614,7 +614,7 @@
                 error: function (XMLHttpRequest) {
                     clearInterval(progressInterval);
                     clearTimeout(requestTimeout);
-                    setButtonLoading($button, false);
+                    setButtonLoading(button, false);
                     hideModalLoading();
                     hideLoading(10);
                     
@@ -637,7 +637,7 @@
                     if (showRetry) {
                         showRetryModal(errorMessage, function() {
                             // 重试逻辑：重新触发click事件
-                            $button.trigger('click');
+                            button.trigger('click');
                         });
                     } else {
                         notice(errorMessage, false);

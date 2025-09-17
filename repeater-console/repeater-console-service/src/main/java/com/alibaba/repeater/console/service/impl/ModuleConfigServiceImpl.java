@@ -325,4 +325,118 @@ public class ModuleConfigServiceImpl implements ModuleConfigService {
             return ResultHelper.fail("自动修复失败: " + e.getMessage());
         }
     }
+
+    @Override
+    public RepeaterResult<Object> debugQueryAllConfigs() {
+        try {
+            List<ModuleConfig> allConfigs = moduleConfigDao.selectAll();
+            
+            List<Map<String, Object>> configList = new ArrayList<>();
+            for (ModuleConfig config : allConfigs) {
+                Map<String, Object> configData = new HashMap<>();
+                configData.put("appName", config.getAppName());
+                configData.put("environment", config.getEnvironment());
+                configData.put("gmtCreate", config.getGmtCreate());
+                configData.put("gmtModified", config.getGmtModified());
+                configData.put("config", config.getConfig());
+                configData.put("configContent", config.getConfig() != null ? 
+                    config.getConfig().substring(0, Math.min(100, config.getConfig().length())) + "..." : "");
+                configList.add(configData);
+            }
+            
+            return ResultHelper.success(configList);
+            
+        } catch (Exception e) {
+            return ResultHelper.fail("查询Config数据失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public RepeaterResult<Object> debugMatchingAnalysis(String appName, String environment) {
+        try {
+            Map<String, Object> analysis = new HashMap<>();
+            
+            // 1. 查询匹配的模块
+            ModuleInfoParams moduleParams = new ModuleInfoParams();
+            moduleParams.setAppName(appName);
+            moduleParams.setEnvironment(environment);
+            moduleParams.setSize(1000);
+            PageResult<ModuleInfoBO> moduleResult = moduleInfoService.query(moduleParams);
+            
+            List<ModuleInfoBO> matchedModules = new ArrayList<>();
+            if (moduleResult != null && moduleResult.isSuccess() && moduleResult.getData() != null) {
+                matchedModules = moduleResult.getData();
+            }
+            
+            // 2. 查询匹配的配置
+            ModuleConfigParams configParams = new ModuleConfigParams();
+            configParams.setAppName(appName);
+            configParams.setEnvironment(environment);
+            List<ModuleConfig> matchedConfigs = new ArrayList<>();
+            try {
+                ModuleConfig config = moduleConfigDao.query(configParams);
+                if (config != null) {
+                    matchedConfigs.add(config);
+                }
+            } catch (Exception e) {
+                // 配置不存在，忽略
+            }
+            
+            // 3. 分析问题和建议
+            List<String> issues = new ArrayList<>();
+            List<String> suggestions = new ArrayList<>();
+            
+            if (matchedModules.isEmpty()) {
+                issues.add("没有找到匹配的模块 (应用名: " + appName + ", 环境: " + environment + ")");
+                
+                // 查询该应用的所有模块
+                ModuleInfoParams allModulesParams = new ModuleInfoParams();
+                allModulesParams.setAppName(appName);
+                allModulesParams.setSize(1000);
+                PageResult<ModuleInfoBO> allModulesResult = moduleInfoService.query(allModulesParams);
+                
+                if (allModulesResult != null && allModulesResult.isSuccess() && 
+                    allModulesResult.getData() != null && !allModulesResult.getData().isEmpty()) {
+                    
+                    Set<String> availableEnvs = new HashSet<>();
+                    for (ModuleInfoBO module : allModulesResult.getData()) {
+                        if (module.getEnvironment() != null) {
+                            availableEnvs.add(module.getEnvironment());
+                        }
+                    }
+                    
+                    if (!availableEnvs.isEmpty()) {
+                        suggestions.add("该应用存在以下环境的模块: " + String.join(", ", availableEnvs));
+                        suggestions.add("请检查环境名称是否正确，或注册新的模块到环境: " + environment);
+                    } else {
+                        suggestions.add("该应用没有注册任何模块，请先在模块管理页面注册模块");
+                    }
+                } else {
+                    suggestions.add("该应用没有注册任何模块，请先在模块管理页面注册模块");
+                }
+            } else {
+                suggestions.add("找到 " + matchedModules.size() + " 个匹配的模块，模块状态正常");
+            }
+            
+            if (matchedConfigs.isEmpty()) {
+                issues.add("没有找到匹配的配置 (应用名: " + appName + ", 环境: " + environment + ")");
+                suggestions.add("请在配置管理页面创建对应的配置");
+            } else {
+                suggestions.add("找到 " + matchedConfigs.size() + " 个匹配的配置");
+            }
+            
+            // 4. 构建返回结果
+            analysis.put("moduleCount", matchedModules.size());
+            analysis.put("configCount", matchedConfigs.size());
+            analysis.put("modules", matchedModules);
+            analysis.put("configs", matchedConfigs);
+            analysis.put("issues", issues);
+            analysis.put("suggestions", suggestions);
+            
+            return ResultHelper.success(analysis);
+            
+        } catch (Exception e) {
+            return ResultHelper.fail("匹配分析失败: " + e.getMessage());
+        }
+    }
 }

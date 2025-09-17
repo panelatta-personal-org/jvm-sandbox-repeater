@@ -127,4 +127,22 @@ public class ModuleConfigController {
         return moduleConfigService.autoFixEnvironments();
     }
 
+    /**
+     * 调试查询所有Config数据
+     */
+    @RequestMapping("debugQuery.json")
+    @ResponseBody
+    public RepeaterResult<Object> debugQueryConfigs() {
+        return moduleConfigService.debugQueryAllConfigs();
+    }
+
+    /**
+     * 调试匹配分析
+     */
+    @RequestMapping("debugMatching.json")
+    @ResponseBody
+    public RepeaterResult<Object> debugMatching(@RequestParam String appName, @RequestParam String environment) {
+        return moduleConfigService.debugMatchingAnalysis(appName, environment);
+    }
+
 }

@@ -21,9 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.Locale;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -412,6 +410,37 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
         } catch (Exception e) {
             // 解析失败时记录日志但不影响注册流程
             return "unknown";
+        }
+    }
+
+    @Override
+    public RepeaterResult<Object> debugQueryAllModules() {
+        try {
+            ModuleInfoParams params = new ModuleInfoParams();
+            params.setSize(1000); // 设置较大的数量以获取所有数据
+            PageResult<ModuleInfoBO> result = query(params);
+            
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                List<Map<String, Object>> moduleList = new ArrayList<>();
+                for (ModuleInfoBO module : result.getData()) {
+                    Map<String, Object> moduleData = new HashMap<>();
+                    moduleData.put("appName", module.getAppName());
+                    moduleData.put("environment", module.getEnvironment());
+                    moduleData.put("ip", module.getIp());
+                    moduleData.put("port", module.getPort());
+                    moduleData.put("status", module.getStatus());
+                    moduleData.put("version", module.getVersion());
+                    moduleData.put("gmtCreate", module.getGmtCreate());
+                    moduleData.put("gmtModified", module.getGmtModified());
+                    moduleList.add(moduleData);
+                }
+                return ResultHelper.success(moduleList);
+            } else {
+                return ResultHelper.success(new ArrayList<>());
+            }
+            
+        } catch (Exception e) {
+            return ResultHelper.fail("查询Module数据失败: " + e.getMessage());
         }
     }
 }

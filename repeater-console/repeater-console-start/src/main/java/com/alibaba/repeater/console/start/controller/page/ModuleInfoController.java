@@ -86,4 +86,13 @@ public class ModuleInfoController {
     public RepeaterResult<ModuleStatusDetail> getModuleStatus(@ModelAttribute("requestParams") ModuleInfoParams params) {
         return ((com.alibaba.repeater.console.service.impl.ModuleInfoServiceImpl) moduleInfoService).getModuleStatus(params);
     }
+
+    /**
+     * 调试查询所有Module数据
+     */
+    @ResponseBody
+    @RequestMapping("/debugQuery.json")
+    public RepeaterResult<Object> debugQueryModules() {
+        return moduleInfoService.debugQueryAllModules();
+    }
 }

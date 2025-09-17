@@ -32,4 +32,9 @@ public interface ModuleInfoService {
     RepeaterResult<String> reload(ModuleInfoParams params);
 
     RepeaterResult<String> remove(ModuleInfoParams params);
+
+    /**
+     * 调试查询所有Module数据
+     */
+    RepeaterResult<Object> debugQueryAllModules();
 }

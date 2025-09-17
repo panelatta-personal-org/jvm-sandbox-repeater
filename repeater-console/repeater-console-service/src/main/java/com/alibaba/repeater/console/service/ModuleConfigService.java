@@ -35,4 +35,14 @@ public interface ModuleConfigService {
      * 自动修复Environment不匹配问题
      */
     RepeaterResult<String> autoFixEnvironments();
+
+    /**
+     * 调试查询所有Config数据
+     */
+    RepeaterResult<Object> debugQueryAllConfigs();
+
+    /**
+     * 调试匹配分析
+     */
+    RepeaterResult<Object> debugMatchingAnalysis(String appName, String environment);
 }

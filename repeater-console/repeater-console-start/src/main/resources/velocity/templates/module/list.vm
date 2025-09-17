@@ -268,6 +268,10 @@
                                                         title="$i18n.get('module.reload.plugin')" data-ip="$!{data.ip}"
                                                         data-app="$!{data.appName}">$i18n.get("module.reload")
                                                 </button>
+                                                <button class="btn btn-danger btn-xs btn-remove" data-toggle="tooltip"
+                                                        title="$i18n.get('module.remove')" data-ip="$!{data.ip}"
+                                                        data-app="$!{data.appName}">$i18n.get("button.remove")
+                                                </button>
                                             </td>
                                         </tr>
                                         #end
@@ -357,6 +361,36 @@
                     updateModuleStatus(jqrow, 'reload-failed');
                 }
             });
+        })
+        
+        jq(".btn-remove").on('click', function () {
+            var jqbtn = jq(this);
+            var jqrow = jqbtn.closest('tr');
+            var appName = jqbtn.attr('data-app');
+            var ip = jqbtn.attr('data-ip');
+            
+            // 确认删除操作
+            if (confirm(i18n.get('confirm.remove.module', appName, ip))) {
+                // 1. 设置按钮加载状态
+                setButtonLoading(jqbtn, true, 'removing');
+                showOperationProgress(jqrow, 'remove');
+                
+                // 2. 执行删除
+                innerPost("/module/remove.json", {'appName': appName, 'ip': ip}, function (response) {
+                    setButtonLoading(jqbtn, false);
+                    hideOperationProgress(jqrow);
+                    
+                    if (response.success) {
+                        // 成功：显示成功信息并刷新页面
+                        notice(response.message, response.success);
+                        setTimeout('window.location.reload()', 1000);
+                    } else {
+                        // 失败：显示错误信息
+                        notice(response.message, response.success);
+                        updateModuleStatus(jqrow, 'remove-failed');
+                    }
+                });
+            }
         })
         
         // 定义按钮状态管理函数
@@ -863,6 +897,9 @@
                     case 'checking':
                         loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.checking');
                         break;
+                    case 'removing':
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('operation.removing');
+                        break;
                     default:
                         loadingText = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
                 }
@@ -886,6 +923,9 @@
                     break;
                 case 'checking':
                     operationText = i18n.get('operation.checking.status');
+                    break;
+                case 'remove':
+                    operationText = i18n.get('operation.removing');
                     break;
                 default:
                     operationText = '处理中...';

@@ -101,7 +101,8 @@ var i18n = {
         if (arguments.length > 1) {
             for (var i = 1; i < arguments.length; i++) {
                 var placeholder = '{' + (i - 1) + '}';
-                message = message.replace(new RegExp(placeholder, 'g'), arguments[i]);
+                // 使用split+join替代正则表达式，避免特殊字符问题
+                message = message.split(placeholder).join(arguments[i]);
             }
         }
         

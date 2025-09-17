@@ -358,28 +358,6 @@
                 }
             });
         })
-        
-        jq("#btn-install").on("click", function () {
-            var modal = jq('#start-install-modal');
-            
-            // 重置表单，确保干净的状态
-            modal.find('#startInstallForm')[0].reset();
-            // 重新设置端口的默认值
-            modal.find("input[name='port']").val('12580');
-            // 重新设置环境的默认值
-            modal.find("select[name='environment']").val('default');
-            
-            modal.on('shown.bs.modal', function () {
-                jq(this).css('display', 'block');
-                var modalHeight = jq(window).height() / 2 - jq('#start-install-modal .modal-dialog').height() / 2;
-                jq(this).find('.modal-dialog').css({
-                    'margin-top': modalHeight
-                });
-                // 聚焦到第一个输入框
-                modal.find("input[name='appName']").focus();
-            });
-            modal.modal('show')
-        })
 
         // 定义按钮状态管理函数
         function setButtonLoading(button, isLoading) {
@@ -512,7 +490,7 @@
             });
         }
 
-        jq("#start-install-btn").on('click', function () {
+        jq("#btn-install").on('click', function () {
             var button = jq(this);
             
             // 限制选择器在模态框内部，避免与页面其他元素冲突

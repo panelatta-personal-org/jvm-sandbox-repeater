@@ -189,32 +189,10 @@
 <script type="application/javascript">
     // 避免与Velocity的$符号冲突
     var jq = jQuery.noConflict();
-    jq(function () {
-        jq(".btn-push").on('click', function () {
-            var appName = jq(this).attr('data-app');
-            var environment = jq(this).attr('data-env');
-            
-            // 显示调试面板并记录推送参数
-            showConfigDebugPanel();
-            logPushParams(appName, environment);
-            
-            // 先查询匹配的模块
-            checkModuleMatches(appName, environment, function(matchResult) {
-                logModuleMatches(matchResult);
-                
-                if (matchResult.hasMatches) {
-                    // 有匹配的模块，执行推送
-                    executePushConfig(appName, environment);
-                } else {
-                    // 没有匹配的模块，显示详细原因
-                    showNoMatchReason(matchResult.reason, matchResult.suggestions);
-                }
-            });
-        })
-        
-        // ==================== 方案1：Config推送调试面板函数 ====================
-        
-        window.toggleConfigDebugPanel = function() {
+    
+    // ==================== 全局函数定义 (供HTML onclick调用) ====================
+    
+    window.toggleConfigDebugPanel = function() {
             var panel = jq('#config-debug-panel');
             if (panel.is(':visible')) {
                 panel.hide();
@@ -396,6 +374,52 @@
             jq('#environment-checker-modal').modal('show');
             runEnvironmentCheck();
         };
+        
+        window.autoFixEnvironments = function() {
+            if (confirm('确定要自动修复Environment不匹配的问题吗？这将修改Config表中的environment字段。')) {
+                jq.ajax({
+                    url: '/config/autoFixEnvironments.json',
+                    method: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            notice('自动修复完成: ' + response.message, true);
+                            runEnvironmentCheck(); // 重新检查
+                        } else {
+                            notice('自动修复失败: ' + response.message, false);
+                        }
+                    },
+                    error: function() {
+                        notice('自动修复请求失败', false);
+                    }
+                });
+            }
+        };
+        
+        // ==================== jQuery DOM Ready 事件绑定 ====================
+        
+        jq(function () {
+            jq(".btn-push").on('click', function () {
+                var appName = jq(this).attr('data-app');
+                var environment = jq(this).attr('data-env');
+                
+                // 显示调试面板并记录推送参数
+                showConfigDebugPanel();
+                logPushParams(appName, environment);
+                
+                // 先查询匹配的模块
+                checkModuleMatches(appName, environment, function(matchResult) {
+                    logModuleMatches(matchResult);
+                    
+                    if (matchResult.hasMatches) {
+                        // 有匹配的模块，执行推送
+                        executePushConfig(appName, environment);
+                    } else {
+                        // 没有匹配的模块，显示详细原因
+                        showNoMatchReason(matchResult.reason, matchResult.suggestions);
+                    }
+                });
+            })
+        });
     
     function createEnvironmentCheckerModal() {
         var modalHtml = '<div class="modal fade" id="environment-checker-modal" tabindex="-1">' +
@@ -508,28 +532,7 @@
         
         jq('#environment-check-content').html(html);
     }
-    
-    window.autoFixEnvironments = function() {
-        if (confirm('确定要自动修复Environment不匹配的问题吗？这将修改Config表中的environment字段。')) {
-            jq.ajax({
-                url: '/config/autoFixEnvironments.json',
-                method: 'POST',
-                success: function(response) {
-                    if (response.success) {
-                        notice('自动修复完成: ' + response.message, true);
-                        runEnvironmentCheck(); // 重新检查
-                    } else {
-                        notice('自动修复失败: ' + response.message, false);
-                    }
-                },
-                error: function() {
-                    notice('自动修复请求失败', false);
-                }
-            });
-        }
-    };
         
-    })
 </script>
 
 <!-- 调试面板样式 -->

@@ -165,6 +165,10 @@
                                                         title="$i18n.get('button.push')" data-env="$!{data.environment}"
                                                         data-app="$!{data.appName}">$i18n.get("button.push")
                                                 </button>
+                                                <button class="btn btn-danger btn-xs btn-config-delete" data-toggle="tooltip"
+                                                        title="$i18n.get('button.delete')" data-env="$!{data.environment}"
+                                                        data-app="$!{data.appName}">$i18n.get("button.delete")
+                                                </button>
                                             </td>
                                         </tr>
                                         #end
@@ -398,6 +402,82 @@
             }
         };
         
+        // ==================== 配置操作工具函数 ====================
+        
+        function setConfigButtonLoading(jqBtn, isLoading, operation) {
+            if (isLoading) {
+                var loadingText = '';
+                switch(operation) {
+                    case 'deleting':
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('operation.deleting');
+                        break;
+                    default:
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+                }
+                
+                jqBtn.prop('disabled', true)
+                    .data('original-html', jqBtn.html())
+                    .html(loadingText)
+                    .addClass('btn-loading');
+            } else {
+                jqBtn.prop('disabled', false)
+                    .html(jqBtn.data('original-html') || jqBtn.html())
+                    .removeClass('btn-loading');
+            }
+        }
+        
+        function showConfigSuccess(title, message) {
+            var content = '<strong>' + title + '</strong>';
+            if (message && message.trim().length > 0) {
+                content += '<br><small class="text-muted">' + message + '</small>';
+            }
+            
+            var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                '<i class="fa fa-check-circle"></i> ' + content +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>';
+            
+            if (jq('#config-alert-container').length === 0) {
+                jq('body').prepend('<div id="config-alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
+            }
+            var successElement = jq(alertHtml);
+            jq('#config-alert-container').append(successElement);
+            
+            setTimeout(function() {
+                successElement.fadeOut(300, function() {
+                    jq(this).remove();
+                });
+            }, 3000);
+        }
+        
+        function showConfigError(title, message) {
+            var content = '<strong>' + title + '</strong>';
+            if (message && message.trim().length > 0) {
+                content += '<br><small class="text-muted">' + message + '</small>';
+            }
+            
+            var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                '<i class="fa fa-exclamation-triangle"></i> ' + content +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>';
+            
+            if (jq('#config-alert-container').length === 0) {
+                jq('body').prepend('<div id="config-alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
+            }
+            var errorElement = jq(alertHtml);
+            jq('#config-alert-container').append(errorElement);
+            
+            setTimeout(function() {
+                errorElement.fadeOut(300, function() {
+                    jq(this).remove();
+                });
+            }, 5000);
+        }
+        
         // ==================== 数据库调试器函数 ====================
         
         window.openDatabaseDebugger = function() {
@@ -625,6 +705,44 @@
                         showNoMatchReason(matchResult.reason, matchResult.suggestions);
                     }
                 });
+            })
+            
+            jq(".btn-config-delete").on('click', function () {
+                var jqBtn = jq(this);
+                var appName = jqBtn.attr('data-app');
+                var environment = jqBtn.attr('data-env');
+                
+                // 确认删除操作
+                if (confirm(i18n.get('confirm.delete.config', appName, environment))) {
+                    // 设置按钮加载状态
+                    setConfigButtonLoading(jqBtn, true, 'deleting');
+                    
+                    // 执行删除
+                    jq.ajax({
+                        url: '/config/delete.json',
+                        method: 'POST',
+                        data: {
+                            appName: appName,
+                            environment: environment
+                        },
+                        success: function(response) {
+                            setConfigButtonLoading(jqBtn, false);
+                            
+                            if (response.success) {
+                                // 成功：显示成功消息并刷新页面
+                                showConfigSuccess(i18n.get('operation.delete.success'), response.message);
+                                setTimeout('window.location.reload()', 1000);
+                            } else {
+                                // 失败：显示错误信息
+                                showConfigError(i18n.get('operation.delete.failed'), response.message);
+                            }
+                        },
+                        error: function() {
+                            setConfigButtonLoading(jqBtn, false);
+                            showConfigError(i18n.get('operation.delete.failed'), 'Network error or server unavailable');
+                        }
+                    });
+                }
             })
         });
     

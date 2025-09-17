@@ -439,4 +439,33 @@ public class ModuleConfigServiceImpl implements ModuleConfigService {
             return ResultHelper.fail("匹配分析失败: " + e.getMessage());
         }
     }
+
+    @Override
+    public RepeaterResult<String> deleteConfig(String appName, String environment) {
+        try {
+            // 验证参数
+            if (StringUtils.isEmpty(appName) || StringUtils.isEmpty(environment)) {
+                return ResultHelper.fail("应用名和环境不能为空");
+            }
+
+            // 查找要删除的配置
+            ModuleConfigParams params = new ModuleConfigParams();
+            params.setAppName(appName);
+            params.setEnvironment(environment);
+            
+            ModuleConfig existingConfig = moduleConfigDao.query(params);
+            if (existingConfig == null) {
+                return ResultHelper.fail("配置不存在: " + appName + "@" + environment);
+            }
+
+            // 执行删除
+            moduleConfigDao.delete(existingConfig);
+
+            return ResultHelper.success("配置删除成功", 
+                "已成功删除配置: " + appName + "@" + environment);
+
+        } catch (Exception e) {
+            return ResultHelper.fail("删除配置失败: " + e.getMessage());
+        }
+    }
 }

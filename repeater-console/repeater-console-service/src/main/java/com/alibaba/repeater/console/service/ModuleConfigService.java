@@ -45,4 +45,9 @@ public interface ModuleConfigService {
      * 调试匹配分析
      */
     RepeaterResult<Object> debugMatchingAnalysis(String appName, String environment);
+
+    /**
+     * 删除配置
+     */
+    RepeaterResult<String> deleteConfig(String appName, String environment);
 }

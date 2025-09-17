@@ -925,12 +925,12 @@
             if (jq('#alert-container').length === 0) {
                 jq('body').prepend('<div id="alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
             }
-            var $alert = jq(alertHtml);
-            jq('#alert-container').append($alert);
+            var alertElement = jq(alertHtml);
+            jq('#alert-container').append(alertElement);
             
             // 3秒后自动消失
             setTimeout(function() {
-                $alert.fadeOut(300, function() {
+                alertElement.fadeOut(300, function() {
                     jq(this).remove();
                 });
             }, 3000);
@@ -955,12 +955,12 @@
             if (jq('#alert-container').length === 0) {
                 jq('body').prepend('<div id="alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
             }
-            var $alert = jq(alertHtml);
-            jq('#alert-container').append($alert);
+            var errorElement = jq(alertHtml);
+            jq('#alert-container').append(errorElement);
             
             // 5秒后自动消失（错误消息显示时间更长）
             setTimeout(function() {
-                $alert.fadeOut(300, function() {
+                errorElement.fadeOut(300, function() {
                     jq(this).remove();
                 });
             }, 5000);

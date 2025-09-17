@@ -59,4 +59,8 @@ public class ModuleConfigDao {
     public List<ModuleConfig> selectAll() {
         return moduleConfigRepository.findAll();
     }
+
+    public void delete(ModuleConfig moduleConfig) {
+        moduleConfigRepository.delete(moduleConfig);
+    }
 }

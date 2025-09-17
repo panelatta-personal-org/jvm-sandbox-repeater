@@ -145,4 +145,13 @@ public class ModuleConfigController {
         return moduleConfigService.debugMatchingAnalysis(appName, environment);
     }
 
+    /**
+     * 删除配置
+     */
+    @RequestMapping("delete.json")
+    @ResponseBody
+    public RepeaterResult<String> deleteConfig(@RequestParam String appName, @RequestParam String environment) {
+        return moduleConfigService.deleteConfig(appName, environment);
+    }
+
 }

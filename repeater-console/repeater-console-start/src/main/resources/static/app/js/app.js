@@ -9,7 +9,7 @@ jQuery(function ($) {
 });
 
 var innerPost = function (uri, data, callback) {
-    $.post("//" + host + uri, data, callback)
+    jQuery.post("//" + host + uri, data, callback)
 };
 
 /**
@@ -21,7 +21,7 @@ var innerPost = function (uri, data, callback) {
  */
 var innerAsyncAjax = function (uri, data, type, callback) {
     showLoading(100)
-    $.ajax({
+    jQuery.ajax({
         type: type,
         url: "//" + host + "/" + uri,
         data: data,
@@ -47,7 +47,7 @@ var innerAsyncAjax = function (uri, data, type, callback) {
  */
 var innerSyncAjax = function (uri, data, type, callback) {
     showLoading(500)
-    $.ajax({
+    jQuery.ajax({
         type: type,
         url: "//" + host + "/" + uri,
         data: data,

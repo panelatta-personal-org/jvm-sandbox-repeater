@@ -459,36 +459,34 @@
 
         // 显示重试模态框
         function showRetryModal(errorMessage, retryCallback) {
-            var retryModalHtml = `
-                <div class="modal fade" id="retry-modal" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content bg-warning">
-                            <div class="modal-header">
-                                <h4 class="modal-title">
-                                    <i class="fa fa-exclamation-triangle"></i> ${i18n.get('modal.retry.title', '连接失败')}
-                                </h4>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">×</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <p><strong>${i18n.get('error.details', '错误详情')}：</strong></p>
-                                <p class="text-muted">${errorMessage}</p>
-                                <hr>
-                                <p>${i18n.get('error.connection.failed.details')}</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">
-                                    <i class="fa fa-times"></i> ${i18n.get('button.close')}
-                                </button>
-                                <button type="button" class="btn btn-outline-dark" id="retry-btn">
-                                    <i class="fa fa-refresh"></i> ${i18n.get('button.retry')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
+            var retryModalHtml = '<div class="modal fade" id="retry-modal" tabindex="-1" role="dialog" aria-hidden="true">' +
+                '<div class="modal-dialog">' +
+                '<div class="modal-content bg-warning">' +
+                '<div class="modal-header">' +
+                '<h4 class="modal-title">' +
+                '<i class="fa fa-exclamation-triangle"></i> ' + i18n.get('modal.retry.title', '连接失败') +
+                '</h4>' +
+                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                '<span aria-hidden="true">×</span>' +
+                '</button>' +
+                '</div>' +
+                '<div class="modal-body">' +
+                '<p><strong>' + i18n.get('error.details', '错误详情') + '：</strong></p>' +
+                '<p class="text-muted">' + errorMessage + '</p>' +
+                '<hr>' +
+                '<p>' + i18n.get('error.connection.failed.details') + '</p>' +
+                '</div>' +
+                '<div class="modal-footer">' +
+                '<button type="button" class="btn btn-outline-dark" data-dismiss="modal">' +
+                '<i class="fa fa-times"></i> ' + i18n.get('button.close') +
+                '</button>' +
+                '<button type="button" class="btn btn-outline-dark" id="retry-btn">' +
+                '<i class="fa fa-refresh"></i> ' + i18n.get('button.retry') +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
             
             // 移除已存在的重试模态框
             $('#retry-modal').remove();
@@ -732,16 +730,16 @@
         // 版本解析调试功能
         window.debugVersionParsing = function(sampleResponse) {
             // 默认使用实际的sandbox响应格式
-            var realSandboxResponse = `      ID : repeater
- VERSION : 1.0.0
-  AUTHOR : zhaoyb1990
-JAR_FILE : /root/.sandbox-module/repeater-module.jar
-   STATE : ACTIVE
-    MODE : {AGENT,ATTACH}
-   CLASS : com.alibaba.jvm.sandbox.repeater.module.RepeaterModule
-  LOADER : ModuleJarClassLoader[crc32=3909007247;file=/root/.sandbox-module/repeater-module.jar;]
-    cCnt : 0
-    mCnt : 0`;
+            var realSandboxResponse = '      ID : repeater\n' +
+' VERSION : 1.0.0\n' +
+'  AUTHOR : zhaoyb1990\n' +
+'JAR_FILE : /root/.sandbox-module/repeater-module.jar\n' +
+'   STATE : ACTIVE\n' +
+'    MODE : {AGENT,ATTACH}\n' +
+'   CLASS : com.alibaba.jvm.sandbox.repeater.module.RepeaterModule\n' +
+'  LOADER : ModuleJarClassLoader[crc32=3909007247;file=/root/.sandbox-module/repeater-module.jar;]\n' +
+'    cCnt : 0\n' +
+'    mCnt : 0';
 
             var testResponse = sampleResponse || realSandboxResponse;
             
@@ -883,15 +881,12 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
                     operationText = '处理中...';
             }
             
-            var progressHtml = `
-                <div class="operation-progress">
-                    <div class="progress" style="height: 4px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
-                             style="width: 100%"></div>
-                    </div>
-                    <small class="text-muted">${operationText}</small>
-                </div>
-            `;
+            var progressHtml = '<div class="operation-progress">' +
+                '<div class="progress" style="height: 4px;">' +
+                '<div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 100%"></div>' +
+                '</div>' +
+                '<small class="text-muted">' + operationText + '</small>' +
+                '</div>';
             $row.find('.operation-status').html(progressHtml);
         }
 
@@ -905,28 +900,20 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
             
             switch(status) {
                 case 'reload-success':
-                    statusHtml = `
-                        <i class="fa fa-circle text-success" title="最近reload成功"></i>
-                        <span class="badge badge-success">${i18n.get('operation.reload.success')}</span>
-                    `;
+                    statusHtml = '<i class="fa fa-circle text-success" title="最近reload成功"></i>' +
+                        '<span class="badge badge-success">' + i18n.get('operation.reload.success') + '</span>';
                     break;
                 case 'reload-failed':
-                    statusHtml = `
-                        <i class="fa fa-circle text-danger" title="reload失败"></i>
-                        <span class="badge badge-danger">${i18n.get('operation.reload.failed')}</span>
-                    `;
+                    statusHtml = '<i class="fa fa-circle text-danger" title="reload失败"></i>' +
+                        '<span class="badge badge-danger">' + i18n.get('operation.reload.failed') + '</span>';
                     break;
                 case 'checking':
-                    statusHtml = `
-                        <i class="fa fa-circle text-warning" title="检测中"></i>
-                        <span class="badge badge-warning">${i18n.get('status.checking')}</span>
-                    `;
+                    statusHtml = '<i class="fa fa-circle text-warning" title="检测中"></i>' +
+                        '<span class="badge badge-warning">' + i18n.get('status.checking') + '</span>';
                     break;
                 default:
-                    statusHtml = `
-                        <i class="fa fa-circle text-muted" title="未检测"></i>
-                        <span class="badge badge-secondary">待检测</span>
-                    `;
+                    statusHtml = '<i class="fa fa-circle text-muted" title="未检测"></i>' +
+                        '<span class="badge badge-secondary">待检测</span>';
             }
             
             $indicators.html(statusHtml);
@@ -955,22 +942,22 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
             if (statusData.online) {
                 var colorClass = statusData.responseTime < 1000 ? 'text-success' : 
                                 statusData.responseTime < 3000 ? 'text-warning' : 'text-danger';
-                statusHtml += `<i class="fa fa-circle ${colorClass}" 
-                                  title="${i18n.get('status.online')} (${statusData.responseTime}ms)"></i> `;
+                statusHtml += '<i class="fa fa-circle ' + colorClass + '" title="' + 
+                    i18n.get('status.online') + ' (' + statusData.responseTime + 'ms)"></i> ';
             } else {
-                statusHtml += `<i class="fa fa-circle text-muted" title="${i18n.get('status.offline')}"></i> `;
+                statusHtml += '<i class="fa fa-circle text-muted" title="' + i18n.get('status.offline') + '"></i> ';
             }
             
             // 模块状态
             if (statusData.moduleActive) {
-                statusHtml += `<span class="badge badge-success">${i18n.get('status.active')}</span>`;
+                statusHtml += '<span class="badge badge-success">' + i18n.get('status.active') + '</span>';
             } else {
-                statusHtml += `<span class="badge badge-danger">${i18n.get('status.inactive')}</span>`;
+                statusHtml += '<span class="badge badge-danger">' + i18n.get('status.inactive') + '</span>';
             }
             
             // 响应时间
             if (statusData.responseTime) {
-                statusHtml += ` <small class="text-muted">${statusData.responseTime}ms</small>`;
+                statusHtml += ' <small class="text-muted">' + statusData.responseTime + 'ms</small>';
             }
             
             $row.find('.status-indicators').html(statusHtml);
@@ -978,10 +965,8 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
 
         function showSuccess(message, detail) {
             if (detail) {
-                $("#success-message-area").html(`
-                    <strong>${message}</strong><br>
-                    <small class="text-muted">${detail}</small>
-                `);
+                $("#success-message-area").html('<strong>' + message + '</strong><br>' +
+                    '<small class="text-muted">' + detail + '</small>');
             } else {
                 $("#success-message-area").html(message);
             }
@@ -989,9 +974,9 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
         }
 
         function showError(title, message, detail) {
-            var errorContent = `<strong>${title}</strong><br>${message}`;
+            var errorContent = '<strong>' + title + '</strong><br>' + message;
             if (detail) {
-                errorContent += `<br><br><div class="error-detail-content">${detail}</div>`;
+                errorContent += '<br><br><div class="error-detail-content">' + detail + '</div>';
             }
             $("#danger-message-area").html(errorContent);
             $("#danger-modal").modal('show');
@@ -1068,23 +1053,21 @@ JAR_FILE : /root/.sandbox-module/repeater-module.jar
                         // 记录检测结果
                         var status = response.data.online ? '在线' : '离线';
                         var moduleStatus = response.data.moduleActive ? '运行中' : '异常';
-                        console.log(`✅ ${appName}@${ip}: ${status}, ${moduleStatus}, ${response.data.responseTime}ms`);
+                        console.log('✅ ' + appName + '@' + ip + ': ' + status + ', ' + moduleStatus + ', ' + response.data.responseTime + 'ms');
                     } else {
                         updateModuleStatusOffline($row, response.message);
-                        console.log(`❌ ${appName}@${ip}: 检测失败 - ${response.message}`);
+                        console.log('❌ ' + appName + '@' + ip + ': 检测失败 - ' + response.message);
                     }
                 })
                 .fail(function(xhr, status, error) {
-                    updateModuleStatusOffline($row, `网络错误: ${error}`);
-                    console.log(`🔌 ${appName}@${ip}: 网络异常 - ${error}`);
+                    updateModuleStatusOffline($row, '网络错误: ' + error);
+                    console.log('🔌 ' + appName + '@' + ip + ': 网络异常 - ' + error);
                 });
         }
         
         function updateModuleStatusOffline($row, error) {
-            var statusHtml = `
-                <i class="fa fa-circle text-danger" title="连接失败: ${error}"></i>
-                <span class="badge badge-danger">${i18n.get('status.offline')}</span>
-            `;
+            var statusHtml = '<i class="fa fa-circle text-danger" title="连接失败: ' + error + '"></i>' +
+                '<span class="badge badge-danger">' + i18n.get('status.offline') + '</span>';
             $row.find('.status-indicators').html(statusHtml);
         }
         

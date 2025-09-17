@@ -238,16 +238,14 @@
                 timestamp: new Date().toLocaleString()
             };
             
-            var html = `
-                <div class="param-item">
-                    <strong>应用名:</strong> <span class="text-primary">${appName}</span><br>
-                    <strong>环境:</strong> <span class="text-info">${environment}</span><br>
-                    <strong>时间:</strong> <span class="text-muted">${params.timestamp}</span>
-                </div>
-            `;
+            var html = '<div class="param-item">' +
+                '<strong>应用名:</strong> <span class="text-primary">' + appName + '</span><br>' +
+                '<strong>环境:</strong> <span class="text-info">' + environment + '</span><br>' +
+                '<strong>时间:</strong> <span class="text-muted">' + params.timestamp + '</span>' +
+                '</div>';
             
             $('#push-params-display').html(html);
-            addDebugLog('📤', `开始推送Config - AppName: ${appName}, Environment: ${environment}`);
+            addDebugLog('📤', '开始推送Config - AppName: ' + appName + ', Environment: ' + environment);
         }
         
         function checkModuleMatches(appName, environment, callback) {
@@ -285,29 +283,28 @@
         function logModuleMatches(matchResult) {
             var html = '';
             if (matchResult.hasMatches) {
-                html = `
-                    <div class="alert alert-success">
-                        <strong>✅ 找到 ${matchResult.matchCount} 个匹配的模块</strong>
-                    </div>
-                    <div class="mt-2">
-                        <small class="text-muted">匹配的模块将接收Config推送</small>
-                    </div>
-                `;
-                addDebugLog('✅', `找到 ${matchResult.matchCount} 个匹配的模块`);
+                html = '<div class="alert alert-success">' +
+                    '<strong>✅ 找到 ' + matchResult.matchCount + ' 个匹配的模块</strong>' +
+                    '</div>' +
+                    '<div class="mt-2">' +
+                    '<small class="text-muted">匹配的模块将接收Config推送</small>' +
+                    '</div>';
+                addDebugLog('✅', '找到 ' + matchResult.matchCount + ' 个匹配的模块');
             } else {
-                html = `
-                    <div class="alert alert-danger">
-                        <strong>❌ 没有找到匹配的模块</strong>
-                    </div>
-                    <div class="mt-2">
-                        <strong>原因:</strong> <span class="text-danger">${getReasonText(matchResult.reason)}</span><br>
-                        <strong>可用的Environments:</strong><br>
-                        ${matchResult.availableEnvironments.map(env => 
-                            `<span class="badge badge-secondary mr-1">${env}</span>`
-                        ).join('')}
-                    </div>
-                `;
-                addDebugLog('❌', `没有找到匹配的模块 - ${getReasonText(matchResult.reason)}`);
+                var envBadges = '';
+                for (var i = 0; i < matchResult.availableEnvironments.length; i++) {
+                    envBadges += '<span class="badge badge-secondary mr-1">' + matchResult.availableEnvironments[i] + '</span>';
+                }
+                
+                html = '<div class="alert alert-danger">' +
+                    '<strong>❌ 没有找到匹配的模块</strong>' +
+                    '</div>' +
+                    '<div class="mt-2">' +
+                    '<strong>原因:</strong> <span class="text-danger">' + getReasonText(matchResult.reason) + '</span><br>' +
+                    '<strong>可用的Environments:</strong><br>' +
+                    envBadges +
+                    '</div>';
+                addDebugLog('❌', '没有找到匹配的模块 - ' + getReasonText(matchResult.reason));
             }
             
             $('#module-match-display').html(html);
@@ -337,32 +334,33 @@
                 success: function (res) {
                     hideLoading(10);
                     if (res.success) {
-                        addDebugLog('✅', `Config推送成功: ${res.message}`);
+                        addDebugLog('✅', 'Config推送成功: ' + res.message);
                     } else {
-                        addDebugLog('❌', `Config推送失败: ${res.message}`);
+                        addDebugLog('❌', 'Config推送失败: ' + res.message);
                     }
                     notice(res.message, res.success);
                 },
                 dataType: 'json',
                 error: function (XMLHttpRequest) {
                     hideLoading(10);
-                    addDebugLog('💥', `Config推送异常: ${XMLHttpRequest.responseText}`);
+                    addDebugLog('💥', 'Config推送异常: ' + XMLHttpRequest.responseText);
                     notice(JSON.stringify(XMLHttpRequest), false);
                 }
             });
         }
         
         function showNoMatchReason(reason, suggestions) {
-            var suggestionHtml = suggestions.map(s => `<li>${s}</li>`).join('');
+            var suggestionHtml = '';
+            for (var i = 0; i < suggestions.length; i++) {
+                suggestionHtml += '<li>' + suggestions[i] + '</li>';
+            }
             
-            var alertHtml = `
-                <div class="alert alert-warning">
-                    <h5><i class="fa fa-exclamation-triangle"></i> 无法推送Config</h5>
-                    <p><strong>原因:</strong> ${getReasonText(reason)}</p>
-                    <p><strong>建议:</strong></p>
-                    <ul>${suggestionHtml}</ul>
-                </div>
-            `;
+            var alertHtml = '<div class="alert alert-warning">' +
+                '<h5><i class="fa fa-exclamation-triangle"></i> 无法推送Config</h5>' +
+                '<p><strong>原因:</strong> ' + getReasonText(reason) + '</p>' +
+                '<p><strong>建议:</strong></p>' +
+                '<ul>' + suggestionHtml + '</ul>' +
+                '</div>';
             
             $("#danger-message-area").html(alertHtml);
             $("#danger-modal").modal('show');
@@ -370,13 +368,11 @@
         
         function addDebugLog(icon, message) {
             var timestamp = new Date().toLocaleTimeString();
-            var logEntry = `
-                <div class="debug-log-entry">
-                    <span class="text-muted">[${timestamp}]</span> 
-                    <span>${icon}</span> 
-                    <span>${message}</span>
-                </div>
-            `;
+            var logEntry = '<div class="debug-log-entry">' +
+                '<span class="text-muted">[' + timestamp + ']</span> ' +
+                '<span>' + icon + '</span> ' +
+                '<span>' + message + '</span>' +
+                '</div>';
             
             var $logDisplay = $('#debug-log-display');
             $logDisplay.append(logEntry);
@@ -405,37 +401,34 @@
     };
     
     function createEnvironmentCheckerModal() {
-        var modalHtml = `
-            <div class="modal fade" id="environment-checker-modal" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header bg-info">
-                            <h4 class="modal-title">
-                                <i class="fa fa-check-circle"></i> Environment一致性检查器
-                            </h4>
-                            <button type="button" class="close" data-dismiss="modal">
-                                <span>&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="environment-check-content">
-                                <!-- 检查结果内容 -->
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" onclick="runEnvironmentCheck()">
-                                <i class="fa fa-refresh"></i> 重新检查
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="autoFixEnvironments()" 
-                                    id="auto-fix-btn" style="display:none;">
-                                <i class="fa fa-magic"></i> 自动修复
-                            </button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+        var modalHtml = '<div class="modal fade" id="environment-checker-modal" tabindex="-1">' +
+            '<div class="modal-dialog modal-lg">' +
+            '<div class="modal-content">' +
+            '<div class="modal-header bg-info">' +
+            '<h4 class="modal-title">' +
+            '<i class="fa fa-check-circle"></i> Environment一致性检查器' +
+            '</h4>' +
+            '<button type="button" class="close" data-dismiss="modal">' +
+            '<span>&times;</span>' +
+            '</button>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '<div id="environment-check-content">' +
+            '<!-- 检查结果内容 -->' +
+            '</div>' +
+            '</div>' +
+            '<div class="modal-footer">' +
+            '<button type="button" class="btn btn-primary" onclick="runEnvironmentCheck()">' +
+            '<i class="fa fa-refresh"></i> 重新检查' +
+            '</button>' +
+            '<button type="button" class="btn btn-success" onclick="autoFixEnvironments()" id="auto-fix-btn" style="display:none;">' +
+            '<i class="fa fa-magic"></i> 自动修复' +
+            '</button>' +
+            '<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
         $('body').append(modalHtml);
     }
     
@@ -450,7 +443,7 @@
                 if (response.success) {
                     displayEnvironmentCheckResult(response.data);
                 } else {
-                    $content.html(`<div class="alert alert-danger">检查失败: ${response.message}</div>`);
+                    $content.html('<div class="alert alert-danger">检查失败: ' + response.message + '</div>');
                 }
             },
             error: function() {
@@ -464,60 +457,53 @@
         
         // 总体状态
         if (data.hasIssues) {
-            html += `
-                <div class="alert alert-warning">
-                    <h5><i class="fa fa-exclamation-triangle"></i> 发现Environment不匹配问题</h5>
-                    <p>发现 ${data.issueCount} 个不匹配的Config配置</p>
-                </div>
-            `;
+            html += '<div class="alert alert-warning">' +
+                '<h5><i class="fa fa-exclamation-triangle"></i> 发现Environment不匹配问题</h5>' +
+                '<p>发现 ' + data.issueCount + ' 个不匹配的Config配置</p>' +
+                '</div>';
             $('#auto-fix-btn').show();
         } else {
-            html += `
-                <div class="alert alert-success">
-                    <h5><i class="fa fa-check"></i> Environment配置正常</h5>
-                    <p>所有Config的Environment都有对应的模块</p>
-                </div>
-            `;
+            html += '<div class="alert alert-success">' +
+                '<h5><i class="fa fa-check"></i> Environment配置正常</h5>' +
+                '<p>所有Config的Environment都有对应的模块</p>' +
+                '</div>';
             $('#auto-fix-btn').hide();
         }
         
         // 详细的匹配表
         if (data.details && data.details.length > 0) {
             html += '<h5>📊 详细匹配情况</h5>';
-            html += `
-                <table class="table table-sm table-striped">
-                    <thead>
-                        <tr>
-                            <th>Config (AppName)</th>
-                            <th>Config Environment</th>
-                            <th>匹配状态</th>
-                            <th>可用的Module Environments</th>
-                            <th>建议</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            html += '<table class="table table-sm table-striped">' +
+                '<thead>' +
+                '<tr>' +
+                '<th>Config (AppName)</th>' +
+                '<th>Config Environment</th>' +
+                '<th>匹配状态</th>' +
+                '<th>可用的Module Environments</th>' +
+                '<th>建议</th>' +
+                '</tr>' +
+                '</thead>' +
+                '<tbody>';
             
             data.details.forEach(function(item) {
                 var statusClass = item.matched ? 'text-success' : 'text-danger';
                 var statusIcon = item.matched ? 'fa-check' : 'fa-times';
                 var statusText = item.matched ? '匹配' : '不匹配';
                 
-                html += `
-                    <tr>
-                        <td>${item.configAppName}</td>
-                        <td><span class="badge badge-primary">${item.configEnvironment}</span></td>
-                        <td class="${statusClass}">
-                            <i class="fa ${statusIcon}"></i> ${statusText}
-                        </td>
-                        <td>
-                            ${item.availableEnvironments.map(env => 
-                                `<span class="badge badge-secondary">${env}</span>`
-                            ).join(' ')}
-                        </td>
-                        <td>${item.suggestion}</td>
-                    </tr>
-                `;
+                var envBadges = '';
+                for (var i = 0; i < item.availableEnvironments.length; i++) {
+                    envBadges += '<span class="badge badge-secondary">' + item.availableEnvironments[i] + '</span> ';
+                }
+                
+                html += '<tr>' +
+                    '<td>' + item.configAppName + '</td>' +
+                    '<td><span class="badge badge-primary">' + item.configEnvironment + '</span></td>' +
+                    '<td class="' + statusClass + '">' +
+                    '<i class="fa ' + statusIcon + '"></i> ' + statusText +
+                    '</td>' +
+                    '<td>' + envBadges + '</td>' +
+                    '<td>' + item.suggestion + '</td>' +
+                    '</tr>';
             });
             
             html += '</tbody></table>';

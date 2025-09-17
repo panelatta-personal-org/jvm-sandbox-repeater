@@ -99,4 +99,31 @@ public class ModuleConfigController {
         return moduleConfigService.push(params);
     }
 
+    /**
+     * 检查模块匹配情况 - 方案1调试API
+     */
+    @RequestMapping("checkMatches.json")
+    @ResponseBody
+    public RepeaterResult<Object> checkMatches(@RequestParam String appName, @RequestParam String environment) {
+        return moduleConfigService.checkModuleMatches(appName, environment);
+    }
+
+    /**
+     * Environment一致性检查 - 方案2调试API
+     */
+    @RequestMapping("checkEnvironments.json")
+    @ResponseBody
+    public RepeaterResult<Object> checkEnvironments() {
+        return moduleConfigService.checkEnvironments();
+    }
+
+    /**
+     * 自动修复Environment不匹配问题
+     */
+    @RequestMapping("autoFixEnvironments.json")
+    @ResponseBody
+    public RepeaterResult<String> autoFixEnvironments() {
+        return moduleConfigService.autoFixEnvironments();
+    }
+
 }

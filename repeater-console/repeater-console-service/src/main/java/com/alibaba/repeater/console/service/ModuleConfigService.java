@@ -20,4 +20,19 @@ public interface ModuleConfigService {
     RepeaterResult<ModuleConfigBO> saveOrUpdate(ModuleConfigParams params);
 
     RepeaterResult<ModuleConfigBO> push(ModuleConfigParams params);
+
+    /**
+     * 检查指定应用和环境的模块匹配情况
+     */
+    RepeaterResult<Object> checkModuleMatches(String appName, String environment);
+
+    /**
+     * 检查所有Config的Environment一致性
+     */
+    RepeaterResult<Object> checkEnvironments();
+
+    /**
+     * 自动修复Environment不匹配问题
+     */
+    RepeaterResult<String> autoFixEnvironments();
 }

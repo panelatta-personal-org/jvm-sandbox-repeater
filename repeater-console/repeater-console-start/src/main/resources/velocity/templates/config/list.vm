@@ -33,6 +33,51 @@
 
         <!-- Main content -->
         <section class="content">
+            <!-- Config推送调试面板 -->
+            <div class="row">
+                <div class="col-12">
+                    <div id="config-debug-panel" class="card card-warning collapsed-card" style="display:none;">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fa fa-bug"></i> Config推送调试面板
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-warning btn-sm" data-card-widget="collapse">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <button type="button" class="btn btn-warning btn-sm" onclick="clearDebugLog()">
+                                    <i class="fa fa-trash"></i> 清空
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>📋 推送参数</h5>
+                                    <div id="push-params-display" class="debug-content">
+                                        <p class="text-muted">点击推送按钮时显示参数</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>🔍 模块匹配结果</h5>
+                                    <div id="module-match-display" class="debug-content">
+                                        <p class="text-muted">显示匹配的模块列表</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <h5>📝 调试日志</h5>
+                                    <div id="debug-log-display" class="debug-log">
+                                        <!-- 实时调试日志 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-12">
                     <div class="card card-blue card-outline">
@@ -41,6 +86,14 @@
                                 $i18n.get("title.config.management") <i class="fa fa-cogs"></i>
                             </h5>
                             <div class="card-tools">
+                                <div class="btn-group float-right" role="group" style="margin-right: 10px;">
+                                    <button type="button" class="btn btn-info btn-sm" onclick="openEnvironmentChecker()">
+                                        <i class="fa fa-check-circle"></i> Environment检查器
+                                    </button>
+                                    <button type="button" class="btn btn-warning btn-sm" onclick="toggleConfigDebugPanel()">
+                                        <i class="fa fa-bug"></i> 调试面板
+                                    </button>
+                                </div>
                                 <a href="/config/add.htm" target="_blank" class="btn btn-primary btn-sm float-right"
                                         data-loading-text="searching">
                                     $i18n.get("button.add.config")
@@ -136,9 +189,144 @@
 <script type="application/javascript">
     jQuery(function ($) {
         $(".btn-push").on('click', function () {
-            var appName = $(this).attr('data-app')
-            var environment  = $(this).attr('data-env')
-            showLoading(10)
+            var appName = $(this).attr('data-app');
+            var environment = $(this).attr('data-env');
+            
+            // 显示调试面板并记录推送参数
+            showConfigDebugPanel();
+            logPushParams(appName, environment);
+            
+            // 先查询匹配的模块
+            checkModuleMatches(appName, environment, function(matchResult) {
+                logModuleMatches(matchResult);
+                
+                if (matchResult.hasMatches) {
+                    // 有匹配的模块，执行推送
+                    executePushConfig(appName, environment);
+                } else {
+                    // 没有匹配的模块，显示详细原因
+                    showNoMatchReason(matchResult.reason, matchResult.suggestions);
+                }
+            });
+        })
+        
+        // ==================== 方案1：Config推送调试面板函数 ====================
+        
+        window.toggleConfigDebugPanel = function() {
+            var $panel = $('#config-debug-panel');
+            if ($panel.is(':visible')) {
+                $panel.hide();
+            } else {
+                $panel.show();
+                if ($panel.hasClass('collapsed-card')) {
+                    $panel.find('[data-card-widget="collapse"]').click();
+                }
+            }
+        };
+        
+        function showConfigDebugPanel() {
+            $('#config-debug-panel').show();
+            if ($('#config-debug-panel').hasClass('collapsed-card')) {
+                $('#config-debug-panel').find('[data-card-widget="collapse"]').click();
+            }
+        }
+        
+        function logPushParams(appName, environment) {
+            var params = {
+                appName: appName,
+                environment: environment,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            var html = `
+                <div class="param-item">
+                    <strong>应用名:</strong> <span class="text-primary">${appName}</span><br>
+                    <strong>环境:</strong> <span class="text-info">${environment}</span><br>
+                    <strong>时间:</strong> <span class="text-muted">${params.timestamp}</span>
+                </div>
+            `;
+            
+            $('#push-params-display').html(html);
+            addDebugLog('📤', `开始推送Config - AppName: ${appName}, Environment: ${environment}`);
+        }
+        
+        function checkModuleMatches(appName, environment, callback) {
+            addDebugLog('🔍', '正在查询匹配的模块...');
+            
+            $.ajax({
+                url: '/config/checkMatches.json',
+                method: 'GET',
+                data: { appName: appName, environment: environment },
+                success: function(response) {
+                    if (response.success) {
+                        callback(response.data);
+                    } else {
+                        callback({
+                            hasMatches: false,
+                            reason: 'api_error',
+                            suggestions: [response.message],
+                            matchCount: 0,
+                            availableEnvironments: []
+                        });
+                    }
+                },
+                error: function() {
+                    callback({
+                        hasMatches: false,
+                        reason: 'network_error',
+                        suggestions: ['检查网络连接', '重试操作'],
+                        matchCount: 0,
+                        availableEnvironments: []
+                    });
+                }
+            });
+        }
+        
+        function logModuleMatches(matchResult) {
+            var html = '';
+            if (matchResult.hasMatches) {
+                html = `
+                    <div class="alert alert-success">
+                        <strong>✅ 找到 ${matchResult.matchCount} 个匹配的模块</strong>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">匹配的模块将接收Config推送</small>
+                    </div>
+                `;
+                addDebugLog('✅', `找到 ${matchResult.matchCount} 个匹配的模块`);
+            } else {
+                html = `
+                    <div class="alert alert-danger">
+                        <strong>❌ 没有找到匹配的模块</strong>
+                    </div>
+                    <div class="mt-2">
+                        <strong>原因:</strong> <span class="text-danger">${getReasonText(matchResult.reason)}</span><br>
+                        <strong>可用的Environments:</strong><br>
+                        ${matchResult.availableEnvironments.map(env => 
+                            `<span class="badge badge-secondary mr-1">${env}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                addDebugLog('❌', `没有找到匹配的模块 - ${getReasonText(matchResult.reason)}`);
+            }
+            
+            $('#module-match-display').html(html);
+        }
+        
+        function getReasonText(reason) {
+            switch(reason) {
+                case 'no_modules': return '该应用没有注册任何模块';
+                case 'environment_mismatch': return 'Environment不匹配';
+                case 'api_error': return 'API调用错误';
+                case 'network_error': return '网络连接错误';
+                default: return '未知原因';
+            }
+        }
+        
+        function executePushConfig(appName, environment) {
+            addDebugLog('🚀', '开始执行Config推送...');
+            showLoading(10);
+            
             $.ajax({
                 type: 'POST',
                 url: "//" + host + "/config/push.json",
@@ -147,18 +335,253 @@
                     "environment": environment,
                 },
                 success: function (res) {
-                    hideLoading(10)
-                    notice(res.message, res.success)
+                    hideLoading(10);
+                    if (res.success) {
+                        addDebugLog('✅', `Config推送成功: ${res.message}`);
+                    } else {
+                        addDebugLog('❌', `Config推送失败: ${res.message}`);
+                    }
+                    notice(res.message, res.success);
                 },
                 dataType: 'json',
                 error: function (XMLHttpRequest) {
-                    hideLoading(10)
+                    hideLoading(10);
+                    addDebugLog('💥', `Config推送异常: ${XMLHttpRequest.responseText}`);
                     notice(JSON.stringify(XMLHttpRequest), false);
                 }
             });
-        })
+        }
+        
+        function showNoMatchReason(reason, suggestions) {
+            var suggestionHtml = suggestions.map(s => `<li>${s}</li>`).join('');
+            
+            var alertHtml = `
+                <div class="alert alert-warning">
+                    <h5><i class="fa fa-exclamation-triangle"></i> 无法推送Config</h5>
+                    <p><strong>原因:</strong> ${getReasonText(reason)}</p>
+                    <p><strong>建议:</strong></p>
+                    <ul>${suggestionHtml}</ul>
+                </div>
+            `;
+            
+            $("#danger-message-area").html(alertHtml);
+            $("#danger-modal").modal('show');
+        }
+        
+        function addDebugLog(icon, message) {
+            var timestamp = new Date().toLocaleTimeString();
+            var logEntry = `
+                <div class="debug-log-entry">
+                    <span class="text-muted">[${timestamp}]</span> 
+                    <span>${icon}</span> 
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            var $logDisplay = $('#debug-log-display');
+            $logDisplay.append(logEntry);
+            $logDisplay.scrollTop($logDisplay[0].scrollHeight);
+        }
+        
+        window.clearDebugLog = function() {
+            $('#debug-log-display').empty();
+            $('#push-params-display').html('<p class="text-muted">点击推送按钮时显示参数</p>');
+            $('#module-match-display').html('<p class="text-muted">显示匹配的模块列表</p>');
+        };
+        
     })
 </script>
+
+<!-- 方案2：Environment检查器JavaScript -->
+<script type="application/javascript">
+    // ==================== 方案2：Environment一致性检查器函数 ====================
+    
+    window.openEnvironmentChecker = function() {
+        if (!$('#environment-checker-modal').length) {
+            createEnvironmentCheckerModal();
+        }
+        $('#environment-checker-modal').modal('show');
+        runEnvironmentCheck();
+    };
+    
+    function createEnvironmentCheckerModal() {
+        var modalHtml = `
+            <div class="modal fade" id="environment-checker-modal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info">
+                            <h4 class="modal-title">
+                                <i class="fa fa-check-circle"></i> Environment一致性检查器
+                            </h4>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="environment-check-content">
+                                <!-- 检查结果内容 -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="runEnvironmentCheck()">
+                                <i class="fa fa-refresh"></i> 重新检查
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="autoFixEnvironments()" 
+                                    id="auto-fix-btn" style="display:none;">
+                                <i class="fa fa-magic"></i> 自动修复
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHtml);
+    }
+    
+    function runEnvironmentCheck() {
+        var $content = $('#environment-check-content');
+        $content.html('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> 正在检查...</div>');
+        
+        $.ajax({
+            url: '/config/checkEnvironments.json',
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    displayEnvironmentCheckResult(response.data);
+                } else {
+                    $content.html(`<div class="alert alert-danger">检查失败: ${response.message}</div>`);
+                }
+            },
+            error: function() {
+                $content.html('<div class="alert alert-danger">检查失败，请重试</div>');
+            }
+        });
+    }
+    
+    function displayEnvironmentCheckResult(data) {
+        var html = '';
+        
+        // 总体状态
+        if (data.hasIssues) {
+            html += `
+                <div class="alert alert-warning">
+                    <h5><i class="fa fa-exclamation-triangle"></i> 发现Environment不匹配问题</h5>
+                    <p>发现 ${data.issueCount} 个不匹配的Config配置</p>
+                </div>
+            `;
+            $('#auto-fix-btn').show();
+        } else {
+            html += `
+                <div class="alert alert-success">
+                    <h5><i class="fa fa-check"></i> Environment配置正常</h5>
+                    <p>所有Config的Environment都有对应的模块</p>
+                </div>
+            `;
+            $('#auto-fix-btn').hide();
+        }
+        
+        // 详细的匹配表
+        if (data.details && data.details.length > 0) {
+            html += '<h5>📊 详细匹配情况</h5>';
+            html += `
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Config (AppName)</th>
+                            <th>Config Environment</th>
+                            <th>匹配状态</th>
+                            <th>可用的Module Environments</th>
+                            <th>建议</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.details.forEach(function(item) {
+                var statusClass = item.matched ? 'text-success' : 'text-danger';
+                var statusIcon = item.matched ? 'fa-check' : 'fa-times';
+                var statusText = item.matched ? '匹配' : '不匹配';
+                
+                html += `
+                    <tr>
+                        <td>${item.configAppName}</td>
+                        <td><span class="badge badge-primary">${item.configEnvironment}</span></td>
+                        <td class="${statusClass}">
+                            <i class="fa ${statusIcon}"></i> ${statusText}
+                        </td>
+                        <td>
+                            ${item.availableEnvironments.map(env => 
+                                `<span class="badge badge-secondary">${env}</span>`
+                            ).join(' ')}
+                        </td>
+                        <td>${item.suggestion}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+        }
+        
+        $('#environment-check-content').html(html);
+    }
+    
+    window.autoFixEnvironments = function() {
+        if (confirm('确定要自动修复Environment不匹配的问题吗？这将修改Config表中的environment字段。')) {
+            $.ajax({
+                url: '/config/autoFixEnvironments.json',
+                method: 'POST',
+                success: function(response) {
+                    if (response.success) {
+                        notice('自动修复完成: ' + response.message, true);
+                        runEnvironmentCheck(); // 重新检查
+                    } else {
+                        notice('自动修复失败: ' + response.message, false);
+                    }
+                },
+                error: function() {
+                    notice('自动修复请求失败', false);
+                }
+            });
+        }
+    };
+</script>
+
+<!-- 调试面板样式 -->
+<style>
+    .debug-content {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 10px;
+        min-height: 100px;
+    }
+    
+    .debug-log {
+        background: #1e1e1e;
+        color: #f8f9fa;
+        border-radius: 4px;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+    }
+    
+    .debug-log-entry {
+        margin-bottom: 5px;
+        padding: 2px 5px;
+        border-radius: 2px;
+        line-height: 1.4;
+    }
+    
+    .param-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 3px;
+        padding: 8px;
+    }
+</style>
 
 </body>
 </html>

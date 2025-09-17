@@ -51,4 +51,12 @@ public class ModuleConfigDao {
     public ModuleConfig saveOrUpdate(ModuleConfig moduleConfig) {
         return moduleConfigRepository.saveAndFlush(moduleConfig);
     }
+
+    public ModuleConfig save(ModuleConfig moduleConfig) {
+        return moduleConfigRepository.saveAndFlush(moduleConfig);
+    }
+
+    public List<ModuleConfig> selectAll() {
+        return moduleConfigRepository.findAll();
+    }
 }

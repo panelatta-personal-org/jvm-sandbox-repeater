@@ -70,53 +70,53 @@ var rnd = function (n, m) {
 };
 
 var showLoading = function (time) {
-    $("#fake-loader").fadeIn(time);
+    jQuery("#fake-loader").fadeIn(time);
 };
 
 var hideLoading = function (time) {
-    $("#fake-loader").fadeOut(time);
+    jQuery("#fake-loader").fadeOut(time);
 };
 
 var notice = function (message, status) {
     if (status) {
-        $("#success-message-area").html(message);
-        $("#success-modal").modal('show')
+        jQuery("#success-message-area").html(message);
+        jQuery("#success-modal").modal('show')
     } else {
-        $("#danger-message-area").html(message);
-        $("#danger-modal").modal('show')
+        jQuery("#danger-message-area").html(message);
+        jQuery("#danger-modal").modal('show')
     }
 };
 
 var noticeUrl = function (message, url) {
-    $("#url-notice-content").text(message);
-    $("#url-notice-url").attr('href', url);
-    $("#url-modal").modal('show')
+    jQuery("#url-notice-content").text(message);
+    jQuery("#url-notice-url").attr('href', url);
+    jQuery("#url-modal").modal('show')
 };
 
 var confirmTwice = function (message, callback) {
-    $(document).off('click', '.confirm-btn');
-    $("#confirm-modal-message").text(message);
-    $("#confirm-modal").modal("show");
-    $(document).on('click', '.confirm-btn', callback);
+    jQuery(document).off('click', '.confirm-btn');
+    jQuery("#confirm-modal-message").text(message);
+    jQuery("#confirm-modal").modal("show");
+    jQuery(document).on('click', '.confirm-btn', callback);
 };
 
 var checkTwice = function (message, callback) {
-    $(document).off('click', '.check-btn');
-    $("#check-modal-message").text(message);
-    $("#check-modal").modal("show");
-    $(document).on('click', '.check-btn', callback);
+    jQuery(document).off('click', '.check-btn');
+    jQuery("#check-modal-message").text(message);
+    jQuery("#check-modal").modal("show");
+    jQuery(document).on('click', '.check-btn', callback);
 };
 
 var confirmDismiss =  function () {
-    $("#confirm-modal").modal("hide");
+    jQuery("#confirm-modal").modal("hide");
 };
 
 var checkDismiss =  function () {
-    $("#check-modal").modal("hide");
+    jQuery("#check-modal").modal("hide");
 };
 
 var notify = function (msg) {
-    $.notify({
+    jQuery.notify({
         // options
         icon: "fa fa-bell-o",
         message: msg
@@ -141,25 +141,25 @@ var notify = function (msg) {
  * @param json
  */
 var bindData = function (rootElement, json) {
-    var el = $("#" + rootElement);
+    var el = jQuery("#" + rootElement);
     if (el === undefined) {
         console.log("no valid root element found in dom,selector is " + rootElement)
         return false;
     }
     var inputBinders = el.find('input[data-bind]');
     inputBinders.each(function () {
-        var key = $(this).attr('data-bind');
+        var key = jQuery(this).attr('data-bind');
         var value = json[key];
         if (value !== undefined) {
-            $(this).val(value)
+            jQuery(this).val(value)
         }
     });
     var textareaBinders = el.find('textarea[data-bind]');
     textareaBinders.each(function () {
-        var key = $(this).attr('data-bind');
+        var key = jQuery(this).attr('data-bind');
         var value = json[key];
         if (value !== undefined) {
-            $(this).val(value)
+            jQuery(this).val(value)
         }
     });
 };

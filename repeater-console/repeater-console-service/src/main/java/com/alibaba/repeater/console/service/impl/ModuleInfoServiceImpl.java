@@ -113,7 +113,10 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
         try {
             // /Users/tom/sandbox/bin/sandbox.sh
             String[] path = StringUtils.split(System.getProperty("user.dir"), File.separator);
-            String userDir = File.separator + path[0] + File.separator + path[1];
+	    // what a trash code!
+            // String userDir = File.separator + path[0] + File.separator + path[1];
+	    String userDir = System.getProperty("user.home");
+
             Process process = Runtime.getRuntime().exec(String.format(installBash, userDir, pid));
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             error = new BufferedReader(new InputStreamReader(process.getErrorStream()));

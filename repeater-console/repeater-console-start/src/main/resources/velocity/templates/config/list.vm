@@ -59,7 +59,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h5>🔍 模块匹配结果</h5>
+                                    <h5>📋 模块匹配结果</h5>
                                     <div id="module-match-display" class="debug-content">
                                         <p class="text-muted">显示匹配的模块列表</p>
                                     </div>
@@ -245,11 +245,11 @@
                 '</div>';
             
             $('#push-params-display').html(html);
-            addDebugLog('📤', '开始推送Config - AppName: ' + appName + ', Environment: ' + environment);
+            addDebugLog('[PUSH]', '开始推送Config - AppName: ' + appName + ', Environment: ' + environment);
         }
         
         function checkModuleMatches(appName, environment, callback) {
-            addDebugLog('🔍', '正在查询匹配的模块...');
+            addDebugLog('[QUERY]', '正在查询匹配的模块...');
             
             $.ajax({
                 url: '/config/checkMatches.json',
@@ -284,12 +284,12 @@
             var html = '';
             if (matchResult.hasMatches) {
                 html = '<div class="alert alert-success">' +
-                    '<strong>✅ 找到 ' + matchResult.matchCount + ' 个匹配的模块</strong>' +
+                    '<strong>[OK] 找到 ' + matchResult.matchCount + ' 个匹配的模块</strong>' +
                     '</div>' +
                     '<div class="mt-2">' +
                     '<small class="text-muted">匹配的模块将接收Config推送</small>' +
                     '</div>';
-                addDebugLog('✅', '找到 ' + matchResult.matchCount + ' 个匹配的模块');
+                addDebugLog('[OK]', '找到 ' + matchResult.matchCount + ' 个匹配的模块');
             } else {
                 var envBadges = '';
                 for (var i = 0; i < matchResult.availableEnvironments.length; i++) {
@@ -297,14 +297,14 @@
                 }
                 
                 html = '<div class="alert alert-danger">' +
-                    '<strong>❌ 没有找到匹配的模块</strong>' +
+                    '<strong>[ERROR] 没有找到匹配的模块</strong>' +
                     '</div>' +
                     '<div class="mt-2">' +
                     '<strong>原因:</strong> <span class="text-danger">' + getReasonText(matchResult.reason) + '</span><br>' +
                     '<strong>可用的Environments:</strong><br>' +
                     envBadges +
                     '</div>';
-                addDebugLog('❌', '没有找到匹配的模块 - ' + getReasonText(matchResult.reason));
+                addDebugLog('[ERROR]', '没有找到匹配的模块 - ' + getReasonText(matchResult.reason));
             }
             
             $('#module-match-display').html(html);
@@ -334,16 +334,16 @@
                 success: function (res) {
                     hideLoading(10);
                     if (res.success) {
-                        addDebugLog('✅', 'Config推送成功: ' + res.message);
+                        addDebugLog('[SUCCESS]', 'Config推送成功: ' + res.message);
                     } else {
-                        addDebugLog('❌', 'Config推送失败: ' + res.message);
+                        addDebugLog('[FAIL]', 'Config推送失败: ' + res.message);
                     }
                     notice(res.message, res.success);
                 },
                 dataType: 'json',
                 error: function (XMLHttpRequest) {
                     hideLoading(10);
-                    addDebugLog('💥', 'Config推送异常: ' + XMLHttpRequest.responseText);
+                    addDebugLog('[EXCEPTION]', 'Config推送异常: ' + XMLHttpRequest.responseText);
                     notice(JSON.stringify(XMLHttpRequest), false);
                 }
             });
@@ -409,7 +409,7 @@
             '<i class="fa fa-check-circle"></i> Environment一致性检查器' +
             '</h4>' +
             '<button type="button" class="close" data-dismiss="modal">' +
-            '<span>&times;</span>' +
+            '<span>×</span>' +
             '</button>' +
             '</div>' +
             '<div class="modal-body">' +
@@ -471,8 +471,8 @@
         }
         
         // 详细的匹配表
-        if (data.details && data.details.length > 0) {
-            html += '<h5>📊 详细匹配情况</h5>';
+        if (data.details &amp;&amp; data.details.length > 0) {
+            html += '<h5>📋 详细匹配情况</h5>';
             html += '<table class="table table-sm table-striped">' +
                 '<thead>' +
                 '<tr>' +

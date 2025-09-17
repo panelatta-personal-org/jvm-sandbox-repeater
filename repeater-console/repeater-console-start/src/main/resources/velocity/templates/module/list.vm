@@ -435,7 +435,7 @@
         var maxWaitTime = 30000; // 30秒超时
 
         function cancelRequest(reason) {
-            if (currentXHR && currentXHR.readyState !== 4) {
+            if (currentXHR &amp;&amp; currentXHR.readyState !== 4) {
                 currentXHR.abort();
             }
             clearTimeout(requestTimeout);
@@ -557,7 +557,7 @@
             }
             
             // 验证端口
-            if (port && (isNaN(port) || port < 1 || port > 65535)) {
+            if (port &amp;&amp; (isNaN(port) || port < 1 || port > 65535)) {
                 alert(i18n.get('js.error.port.range'));
                 modal.find("input[name='port']").focus();
                 return;
@@ -994,12 +994,12 @@
             
             // 每30秒自动检测
             statusMonitorInterval = setInterval(function() {
-                if (isMonitoringEnabled && $('.module-row').length > 0) {
+                if (isMonitoringEnabled &amp;&amp; $('.module-row').length > 0) {
                     checkAllModuleStatus();
                 }
             }, 30000);
             
-            console.log('🔄 模块状态监控已启动，每30秒自动检测');
+            console.log('[STATUS] 模块状态监控已启动，每30秒自动检测');
         }
         
         function stopStatusMonitoring() {
@@ -1008,15 +1008,15 @@
                 clearInterval(statusMonitorInterval);
                 statusMonitorInterval = null;
             }
-            console.log('⏹ 模块状态监控已停止');
+            console.log('[STOP] 模块状态监控已停止');
         }
         
         function checkAllModuleStatus() {
-            console.log('🔍 开始检测所有模块状态...');
+            console.log('[CHECK] 开始检测所有模块状态...');
             var $rows = $('.module-row');
             
             if ($rows.length === 0) {
-                console.log('📭 没有发现模块，跳过检测');
+                console.log('[INFO] 没有发现模块，跳过检测');
                 return;
             }
             
@@ -1026,7 +1026,7 @@
                 var ip = $row.data('ip');
                 
                 if (!appName || !ip) {
-                    console.warn('⚠️ 模块信息不完整，跳过:', $row.get(0));
+                    console.warn('[WARN] 模块信息不完整，跳过:', $row.get(0));
                     return;
                 }
                 
@@ -1053,15 +1053,15 @@
                         // 记录检测结果
                         var status = response.data.online ? '在线' : '离线';
                         var moduleStatus = response.data.moduleActive ? '运行中' : '异常';
-                        console.log('✅ ' + appName + '@' + ip + ': ' + status + ', ' + moduleStatus + ', ' + response.data.responseTime + 'ms');
+                        console.log('[OK] ' + appName + '@' + ip + ': ' + status + ', ' + moduleStatus + ', ' + response.data.responseTime + 'ms');
                     } else {
                         updateModuleStatusOffline($row, response.message);
-                        console.log('❌ ' + appName + '@' + ip + ': 检测失败 - ' + response.message);
+                        console.log('[ERROR] ' + appName + '@' + ip + ': 检测失败 - ' + response.message);
                     }
                 })
                 .fail(function(xhr, status, error) {
                     updateModuleStatusOffline($row, '网络错误: ' + error);
-                    console.log('🔌 ' + appName + '@' + ip + ': 网络异常 - ' + error);
+                    console.log('[NET] ' + appName + '@' + ip + ': 网络异常 - ' + error);
                 });
         }
         

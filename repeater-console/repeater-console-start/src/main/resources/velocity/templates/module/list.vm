@@ -342,7 +342,7 @@
             
             // 2. 执行reload
             innerPost("/module/reload.json", {'appName': appName, 'ip': ip}, function (response) {
-                setButtonLoading(jqbtn, false);
+                setButtonLoading(jqbtn, false, 'reloading');
                 hideOperationProgress(jqrow);
                 
                 if (response.success) {
@@ -377,7 +377,7 @@
                 
                 // 2. 执行删除
                 innerPost("/module/remove.json", {'appName': appName, 'ip': ip}, function (response) {
-                    setButtonLoading(jqbtn, false);
+                    setButtonLoading(jqbtn, false, 'removing');
                     hideOperationProgress(jqrow);
                     
                     if (response.success) {
@@ -393,23 +393,6 @@
             }
         })
         
-        // 定义按钮状态管理函数
-        function setButtonLoading(button, isLoading) {
-            if (isLoading) {
-                var originalText = button.data('original-text') || button.html();
-                button.data('original-text', originalText);
-                
-                button.prop('disabled', true)
-                       .html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.registering'))
-                       .addClass('btn-loading');
-            } else {
-                var originalText = button.data('original-text') || i18n.get('button.register');
-                
-                button.prop('disabled', false)
-                       .html(originalText)
-                       .removeClass('btn-loading');
-            }
-        }
 
         // 定义验证步骤
         var validationSteps = [
@@ -888,8 +871,14 @@
         
         // 按钮状态管理函数
         function setButtonLoading($btn, loading, operation) {
+            var jqBtn = jq($btn); // 转换为jq对象
             if (loading) {
                 var loadingText = '';
+                // 如果没有提供operation参数，使用默认值
+                if (!operation) {
+                    operation = 'default';
+                }
+                
                 switch(operation) {
                     case 'reloading':
                         loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.reloading');
@@ -900,22 +889,85 @@
                     case 'removing':
                         loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('operation.removing');
                         break;
+                    case 'registering':
+                    case 'default':
                     default:
-                        loadingText = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + (i18n.get('button.registering') || '处理中...');
                 }
                 
-                $btn.prop('disabled', true)
-                    .data('original-html', $btn.html())
+                jqBtn.prop('disabled', true)
+                    .data('original-html', jqBtn.html())
                     .html(loadingText)
                     .addClass('btn-loading');
             } else {
-                $btn.prop('disabled', false)
-                    .html($btn.data('original-html') || $btn.html())
+                jqBtn.prop('disabled', false)
+                    .html(jqBtn.data('original-html') || jqBtn.html())
                     .removeClass('btn-loading');
             }
         }
 
+        // 显示成功消息函数
+        function showSuccess(message, data) {
+            var content = message;
+            if (data && typeof data === 'string' && data.trim().length > 0) {
+                content += '<br><small class="text-muted">' + data + '</small>';
+            }
+            
+            // 使用Bootstrap alert显示成功消息
+            var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                '<i class="fa fa-check-circle"></i> ' + content +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>';
+            
+            // 在页面顶部显示消息
+            if (jq('#alert-container').length === 0) {
+                jq('body').prepend('<div id="alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
+            }
+            var $alert = jq(alertHtml);
+            jq('#alert-container').append($alert);
+            
+            // 3秒后自动消失
+            setTimeout(function() {
+                $alert.fadeOut(300, function() {
+                    jq(this).remove();
+                });
+            }, 3000);
+        }
+
+        // 显示错误消息函数
+        function showError(title, message, data) {
+            var content = '<strong>' + title + '</strong><br>' + message;
+            if (data && typeof data === 'string' && data.trim().length > 0) {
+                content += '<br><small class="text-muted">' + data + '</small>';
+            }
+            
+            // 使用Bootstrap alert显示错误消息
+            var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                '<i class="fa fa-exclamation-triangle"></i> ' + content +
+                '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                '<span aria-hidden="true">&times;</span>' +
+                '</button>' +
+                '</div>';
+            
+            // 在页面顶部显示消息
+            if (jq('#alert-container').length === 0) {
+                jq('body').prepend('<div id="alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 9999; width: 350px;"></div>');
+            }
+            var $alert = jq(alertHtml);
+            jq('#alert-container').append($alert);
+            
+            // 5秒后自动消失（错误消息显示时间更长）
+            setTimeout(function() {
+                $alert.fadeOut(300, function() {
+                    jq(this).remove();
+                });
+            }, 5000);
+        }
+
         function showOperationProgress($row, operation) {
+            var jqRow = jq($row); // 转换为jq对象
             var operationText = '';
             switch(operation) {
                 case 'reload':
@@ -937,15 +989,17 @@
                 '</div>' +
                 '<small class="text-muted">' + operationText + '</small>' +
                 '</div>';
-            $row.find('.operation-status').html(progressHtml);
+            jqRow.find('.operation-status').html(progressHtml);
         }
 
         function hideOperationProgress($row) {
-            $row.find('.operation-status').empty();
+            var jqRow = jq($row); // 转换为jq对象
+            jqRow.find('.operation-status').empty();
         }
 
         function updateModuleStatus($row, status) {
-            var $indicators = $row.find('.status-indicators');
+            var jqRow = jq($row); // 转换为jq对象
+            var jqIndicators = jqRow.find('.status-indicators');
             var statusHtml = '';
             
             switch(status) {
@@ -966,7 +1020,7 @@
                         '<span class="badge badge-secondary">待检测</span>';
             }
             
-            $indicators.html(statusHtml);
+            jqIndicators.html(statusHtml);
         }
 
         function verifyModuleStatus(appName, ip, $row) {
@@ -986,6 +1040,7 @@
         }
 
         function updateModuleStatusDisplay($row, statusData) {
+            var jqRow = jq($row); // 转换为jq对象
             var statusHtml = '';
             
             // 连接状态指示灯
@@ -1010,27 +1065,9 @@
                 statusHtml += ' <small class="text-muted">' + statusData.responseTime + 'ms</small>';
             }
             
-            $row.find('.status-indicators').html(statusHtml);
+            jqRow.find('.status-indicators').html(statusHtml);
         }
 
-        function showSuccess(message, detail) {
-            if (detail) {
-                jq("#success-message-area").html('<strong>' + message + '</strong><br>' +
-                    '<small class="text-muted">' + detail + '</small>');
-            } else {
-                jq("#success-message-area").html(message);
-            }
-            jq("#success-modal").modal('show');
-        }
-
-        function showError(title, message, detail) {
-            var errorContent = '<strong>' + title + '</strong><br>' + message;
-            if (detail) {
-                errorContent += '<br><br><div class="error-detail-content">' + detail + '</div>';
-            }
-            jq("#danger-message-area").html(errorContent);
-            jq("#danger-modal").modal('show');
-        }
         
         // 实时状态监控功能
         var statusMonitorInterval;
@@ -1159,20 +1196,20 @@
         // 监控按钮控制函数
         window.toggleMonitorButton = function() {
             var enabled = toggleStatusMonitoring();
-            var $btn = jq('#btn-toggle-monitor');
-            var $text = jq('#monitor-status-text');
-            var $icon = $btn.find('i');
+            var jqBtn = jq('#btn-toggle-monitor');
+            var jqText = jq('#monitor-status-text');
+            var jqIcon = jqBtn.find('i');
             
             if (enabled) {
-                $btn.removeClass('btn-secondary').addClass('btn-success');
-                $icon.removeClass('fa-play').addClass('fa-pause');
-                $text.text('监控中');
-                $btn.attr('title', '点击暂停自动状态监控');
+                jqBtn.removeClass('btn-secondary').addClass('btn-success');
+                jqIcon.removeClass('fa-play').addClass('fa-pause');
+                jqText.text('监控中');
+                jqBtn.attr('title', '点击暂停自动状态监控');
             } else {
-                $btn.removeClass('btn-success').addClass('btn-secondary');
-                $icon.removeClass('fa-pause').addClass('fa-play');
-                $text.text('已暂停');
-                $btn.attr('title', '点击启动自动状态监控');
+                jqBtn.removeClass('btn-success').addClass('btn-secondary');
+                jqIcon.removeClass('fa-pause').addClass('fa-play');
+                jqText.text('已暂停');
+                jqBtn.attr('title', '点击启动自动状态监控');
             }
             
             notice(enabled ? '状态监控已启动' : '状态监控已暂停', true);
@@ -1180,19 +1217,19 @@
         
         // 刷新状态按钮控制函数  
         window.refreshAllStatus = function() {
-            var $btn = jq('#btn-refresh-status');
-            var $icon = $btn.find('i');
+            var jqBtn = jq('#btn-refresh-status');
+            var jqIcon = jqBtn.find('i');
             
             // 设置按钮为加载状态
-            $btn.prop('disabled', true);
-            $icon.addClass('fa-spin');
+            jqBtn.prop('disabled', true);
+            jqIcon.addClass('fa-spin');
             
             checkAllModuleStatus();
             
             // 2秒后恢复按钮状态
             setTimeout(function() {
-                $btn.prop('disabled', false);
-                $icon.removeClass('fa-spin');
+                jqBtn.prop('disabled', false);
+                jqIcon.removeClass('fa-spin');
                 notice('模块状态已刷新', true);
             }, 2000);
         };

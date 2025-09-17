@@ -40,7 +40,25 @@
         <div class="modal-footer justify-content-between">
             <button type="button" class="btn btn-outline-light pull-left" data-dismiss="modal">$i18n.get("button.cancel")</button>
             <button type="button" class="btn btn-outline-light" id="start-install-btn">$i18n.get("button.register")</button>
+        </div>
+        
+        <!-- Loading遮罩层 -->
+        <div class="modal-loading-overlay" id="modal-loading" style="display: none;">
+            <div class="loading-content">
+                <i class="fa fa-spinner fa-spin fa-3x"></i>
+                <h4 id="loading-message">$i18n.get("loading.connecting")</h4>
+                <div class="progress-container">
+                    <div class="progress-step" id="progress-step">$i18n.get("step.validating.form")</div>
+                    <div class="progress-bar-custom">
+                        <div class="progress-bar-fill" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <p id="loading-detail">$i18n.get("loading.please.wait")</p>
+                <button type="button" class="btn btn-outline-light btn-sm" id="cancel-request">
+                    <i class="fa fa-times"></i> $i18n.get("button.cancel.request")
+                </button>
             </div>
+        </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>

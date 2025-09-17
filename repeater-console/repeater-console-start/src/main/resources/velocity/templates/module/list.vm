@@ -3,6 +3,77 @@
 <head>
     #set($pageTitle = $i18n.get("title.module.list"))
     #parse("blocks/html-head.vm")
+    <style>
+        /* 按钮Loading状态样式 */
+        .btn-loading {
+            opacity: 0.8;
+            cursor: not-allowed !important;
+            position: relative;
+        }
+        
+        .btn-loading:hover {
+            opacity: 0.8 !important;
+        }
+        
+        .btn-loading .fa-spinner {
+            margin-right: 8px;
+        }
+        
+        /* 模态框Loading遮罩样式 */
+        .modal-loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1060;
+            border-radius: 4px;
+        }
+        
+        .modal-loading-overlay .loading-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .modal-loading-overlay .loading-content h4 {
+            margin: 20px 0 10px 0;
+            color: white;
+        }
+        
+        .modal-loading-overlay .loading-content p {
+            margin: 10px 0 20px 0;
+            color: #ccc;
+        }
+        
+        .progress-container {
+            width: 300px;
+            margin: 15px auto;
+        }
+        
+        .progress-step {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar-custom {
+            width: 100%;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+    </style>
 </head>
 <body class="hold-transition sidebar-mini">
 <!-- Site wrapper -->
@@ -209,7 +280,142 @@
             modal.modal('show')
         })
 
+        // 定义按钮状态管理函数
+        function setButtonLoading($button, isLoading) {
+            if (isLoading) {
+                $button.prop('disabled', true)
+                       .html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.registering'))
+                       .addClass('btn-loading');
+            } else {
+                $button.prop('disabled', false)
+                       .html(i18n.get('button.register.module'))
+                       .removeClass('btn-loading');
+            }
+        }
+
+        // 定义验证步骤
+        var validationSteps = [
+            { key: 'validating', message: 'step.validating.form', duration: 800 },
+            { key: 'connecting', message: 'step.connecting.remote', duration: 5000 },
+            { key: 'checking', message: 'step.checking.repeater', duration: 3000 },
+            { key: 'registering', message: 'step.registering.module', duration: 2000 }
+        ];
+
+        // 模态框loading管理
+        function showModalLoading() {
+            $('#modal-loading').fadeIn(300);
+        }
+
+        function hideModalLoading() {
+            $('#modal-loading').fadeOut(200);
+        }
+
+        // 显示进度步骤
+        function showProgress(step, current, total) {
+            var percent = Math.round((current / total) * 100);
+            $("#loading-message").text(i18n.get(step.message));
+            $("#progress-step").text(i18n.get(step.message));
+            $("#progress-bar").css('width', percent + '%');
+            
+            var timeText = step.duration > 1000 ? 
+                Math.round(step.duration/1000) + 's' : 
+                step.duration + 'ms';
+            $("#loading-detail").html(
+                i18n.get('progress.step.detail', current, total, percent) + 
+                '<br><small>' + i18n.get('progress.estimated.time') + ': ' + timeText + '</small>'
+            );
+            
+            if (i18n.debug) {
+                console.log('[Progress] Step:', step.key, 'Progress:', percent + '%');
+            }
+        }
+
+        // 请求超时和取消管理
+        var requestTimeout;
+        var currentXHR;
+        var maxWaitTime = 30000; // 30秒超时
+
+        function cancelRequest(reason) {
+            if (currentXHR && currentXHR.readyState !== 4) {
+                currentXHR.abort();
+            }
+            clearTimeout(requestTimeout);
+            hideModalLoading();
+            hideLoading(10);
+            
+            var message = reason === 'timeout' ? 
+                i18n.get('error.request.timeout') : 
+                i18n.get('info.request.cancelled');
+            notice(message, false);
+            
+            if (i18n.debug) {
+                console.log('[Request] Cancelled:', reason);
+            }
+        }
+
+        // 取消请求按钮事件
+        $("#cancel-request").on('click', function() {
+            cancelRequest('user');
+        });
+
+        // 显示重试模态框
+        function showRetryModal(errorMessage, retryCallback) {
+            var retryModalHtml = `
+                <div class="modal fade" id="retry-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-warning">
+                            <div class="modal-header">
+                                <h4 class="modal-title">
+                                    <i class="fa fa-exclamation-triangle"></i> ${i18n.get('modal.retry.title', '连接失败')}
+                                </h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>${i18n.get('error.details', '错误详情')}：</strong></p>
+                                <p class="text-muted">${errorMessage}</p>
+                                <hr>
+                                <p>${i18n.get('error.connection.failed.details')}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" data-dismiss="modal">
+                                    <i class="fa fa-times"></i> ${i18n.get('button.close')}
+                                </button>
+                                <button type="button" class="btn btn-outline-dark" id="retry-btn">
+                                    <i class="fa fa-refresh"></i> ${i18n.get('button.retry')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除已存在的重试模态框
+            $('#retry-modal').remove();
+            
+            // 添加到页面并显示
+            $('body').append(retryModalHtml);
+            $('#retry-modal').modal('show');
+            
+            // 绑定重试按钮事件
+            $('#retry-btn').on('click', function() {
+                $('#retry-modal').modal('hide');
+                setTimeout(function() {
+                    $('#retry-modal').remove();
+                    retryCallback();
+                }, 300);
+            });
+            
+            // 模态框关闭时清理
+            $('#retry-modal').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        }
+
         $("#start-install-btn").on('click', function () {
+            var $button = $(this);
+            
             // 限制选择器在模态框内部，避免与页面其他元素冲突
             var modal = $('#start-install-modal');
             var appName = modal.find("input[name='appName']").val();
@@ -257,25 +463,89 @@
                 return;
             }
             
-            showLoading(10);
-            $("#startInstallForm").ajaxSubmit({
+            // 立即设置按钮为loading状态并显示模态框遮罩
+            setButtonLoading($button, true);
+            showModalLoading();
+            showLoading(300);
+            
+            // 模拟分步骤进度显示
+            var currentStep = 0;
+            var progressInterval = setInterval(function() {
+                if (currentStep < validationSteps.length) {
+                    showProgress(validationSteps[currentStep], currentStep + 1, validationSteps.length);
+                    currentStep++;
+                } else {
+                    clearInterval(progressInterval);
+                }
+            }, 1000);
+            
+            // 设置请求超时
+            requestTimeout = setTimeout(function() {
+                clearInterval(progressInterval);
+                cancelRequest('timeout');
+                setButtonLoading($button, false);
+            }, maxWaitTime);
+            
+            // 发送AJAX请求
+            currentXHR = $("#startInstallForm").ajaxSubmit({
                 type: "post",
                 url: "//" + host + "/module/install.json",
                 success: function (data) {
-                    $("#start-install-modal").modal('hide')
-                    hideLoading(10)
+                    clearInterval(progressInterval);
+                    clearTimeout(requestTimeout);
+                    setButtonLoading($button, false);
+                    hideModalLoading();
+                    hideLoading(10);
+                    $("#start-install-modal").modal('hide');
+                    
                     if (data.success) {
-                        notice(data.message, data.success)
-                        setTimeout('window.location.reload()', 1000)
+                        notice(data.message, data.success);
+                        setTimeout('window.location.reload()', 1000);
                     } else {
-                        notice(data.message, data.success)
+                        notice(data.message, data.success);
+                    }
+                    
+                    if (i18n.debug) {
+                        console.log('[Request] Success:', data);
                     }
                 },
                 error: function (XMLHttpRequest) {
+                    clearInterval(progressInterval);
+                    clearTimeout(requestTimeout);
+                    setButtonLoading($button, false);
+                    hideModalLoading();
                     hideLoading(10);
-                    notice(i18n.get("msg.network.error") + " " + XMLHttpRequest.responseText, false);
+                    
+                    // 智能错误提示和重试机制
+                    var errorMessage = i18n.get("msg.network.error");
+                    var showRetry = false;
+                    
+                    if (XMLHttpRequest.status === 0) {
+                        errorMessage = i18n.get("error.connection.timeout");
+                        showRetry = true;
+                    } else if (XMLHttpRequest.status >= 500) {
+                        errorMessage = i18n.get("error.server.internal");
+                        showRetry = true;
+                    } else if (XMLHttpRequest.status === 404) {
+                        errorMessage = i18n.get("error.server.notfound");
+                    } else if (XMLHttpRequest.status === 400) {
+                        errorMessage = XMLHttpRequest.responseText || i18n.get("error.bad.request");
+                    }
+                    
+                    if (showRetry) {
+                        showRetryModal(errorMessage, function() {
+                            // 重试逻辑：重新触发click事件
+                            $button.trigger('click');
+                        });
+                    } else {
+                        notice(errorMessage, false);
+                    }
+                    
+                    if (i18n.debug) {
+                        console.log('[Request] Error:', XMLHttpRequest);
+                    }
                 }
-            })
+            });
         });
         
         // 调试功能：在浏览器控制台中可以使用 debugModuleForm() 来检查表单状态
@@ -293,11 +563,90 @@
             console.log('IP地址:', '"' + (ip || '') + '"');
             console.log('端口号:', '"' + (port || '') + '"');
             console.log('表单元素:', modal.find('#startInstallForm')[0]);
+            console.log('按钮状态:', $('#start-install-btn').prop('disabled'));
+            console.log('Loading状态:', $('#modal-loading').is(':visible'));
             return {
                 appName: appName ? appName.trim() : '',
                 ip: ip ? ip.trim() : '',
                 port: port ? port.trim() : ''
             };
+        };
+
+        // 高级调试功能：测试请求流程
+        window.debugRequestFlow = function(testData) {
+            if (!testData) {
+                testData = {
+                    appName: 'test-app',
+                    ip: '127.0.0.1',
+                    port: '12580'
+                };
+            }
+            
+            console.log('=== 模拟请求流程调试 ===');
+            console.log('测试数据:', testData);
+            
+            // 填充表单
+            var modal = $('#start-install-modal');
+            modal.find("input[name='appName']").val(testData.appName);
+            modal.find("input[name='ip']").val(testData.ip);
+            modal.find("input[name='port']").val(testData.port);
+            
+            console.log('表单已填充，可以手动点击注册按钮测试');
+            
+            // 显示模态框（如果未显示）
+            if (!modal.is(':visible')) {
+                modal.modal('show');
+            }
+        };
+
+        // 国际化调试功能
+        window.debugI18n = function() {
+            console.log('=== 国际化调试信息 ===');
+            console.log('当前语言环境:', navigator.language);
+            console.log('调试模式:', i18n.debug);
+            console.log('已加载消息数量:', Object.keys(i18n.messages || {}).length);
+            
+            // 测试关键消息
+            var testKeys = [
+                'button.registering',
+                'step.connecting.remote',
+                'error.request.timeout',
+                'modal.retry.title'
+            ];
+            
+            console.log('关键消息测试:');
+            testKeys.forEach(function(key) {
+                console.log('  ' + key + ':', i18n.get(key));
+            });
+            
+            return i18n.messages;
+        };
+
+        // 性能调试功能
+        window.debugPerformance = function() {
+            console.log('=== 性能调试信息 ===');
+            console.log('页面加载时间:', performance.now() + 'ms');
+            console.log('DOM元素数量:', document.querySelectorAll('*').length);
+            console.log('jQuery版本:', $.fn.jquery);
+            console.log('Bootstrap模态框数量:', $('.modal').length);
+            console.log('内存使用:', performance.memory ? performance.memory : '不支持');
+        };
+
+        // 全局调试开关
+        window.enableDebugMode = function() {
+            i18n.debug = true;
+            console.log('=== 调试模式已开启 ===');
+            console.log('可用调试功能:');
+            console.log('  debugModuleForm() - 检查表单状态');
+            console.log('  debugRequestFlow(testData) - 模拟请求流程');
+            console.log('  debugI18n() - 国际化调试');
+            console.log('  debugPerformance() - 性能调试');
+            console.log('  disableDebugMode() - 关闭调试模式');
+        };
+
+        window.disableDebugMode = function() {
+            i18n.debug = false;
+            console.log('调试模式已关闭');
         };
     });
 </script>

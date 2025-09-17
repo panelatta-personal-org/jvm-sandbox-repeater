@@ -4,6 +4,16 @@
 
 本项目已经实现了完整的国际化（i18n）支持，包括中文和英文两种语言。国际化功能覆盖了后端Velocity模板和前端JavaScript代码。
 
+## 新功能亮点
+
+### 动态消息加载
+系统现在会自动加载资源文件中的所有消息键，无需手动维护键列表。
+
+### 前端调试支持
+- 内置调试模式，可在浏览器控制台中开启：`i18n.debug = true`
+- 提供消息键搜索功能：`i18n.searchKeys("error")`
+- 列出所有可用键：`i18n.listKeys()`
+
 ## 测试国际化功能
 
 1. 启动应用后，访问测试页面：
@@ -80,11 +90,44 @@ if (i18n.isChinese()) {
 private MessageSource messageSource;
 
 // 获取国际化消息
-String message = messageSource.getMessage("button.query", null, LocaleContextHolder.getLocale());
-
-// 带参数的消息
-String welcome = messageSource.getMessage("msg.welcome", new Object[]{"张三"}, LocaleContextHolder.getLocale());
+String message = messageSource.getMessage("error.invalid.parameter", null, LocaleContextHolder.getLocale());
 ```
+
+## 调试功能
+
+### 开启调试模式
+
+在浏览器控制台中执行：
+```javascript
+i18n.debug = true;
+```
+
+开启后，当找不到消息键时会在控制台显示警告信息。
+
+### 调试命令
+
+```javascript
+// 列出所有可用的消息键
+i18n.listKeys();
+
+// 搜索包含特定文本的消息键
+i18n.searchKeys("error");     // 搜索包含"error"的键
+i18n.searchKeys("button");    // 搜索包含"button"的键
+
+// 获取当前语言
+i18n.getCurrentLocale();
+
+// 查看已加载的消息数量
+Object.keys(i18n.messages).length;
+```
+
+### 常见调试场景
+
+1. **消息键不存在**：如果页面显示原始键名（如 `js.error.appname.required`），说明该键未在资源文件中定义或未正确加载。
+
+2. **语言切换问题**：检查 `/api/i18n/messages?locale=zh_CN` 接口是否返回正确的消息。
+
+3. **参数替换问题**：使用 `i18n.get("key", "param1", "param2")` 测试参数替换功能。
 
 ## 添加新的国际化文本
 

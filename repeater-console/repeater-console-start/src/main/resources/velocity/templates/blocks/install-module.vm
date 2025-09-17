@@ -1,4 +1,4 @@
-<div class="modal fade show" id="start-install-modal" data-easein="shrinkIn" role="dialog" aria-hidden="true">
+<div class="modal fade" id="start-install-modal" data-easein="shrinkIn" role="dialog" aria-hidden="true">
     <div class="modal-dialog" style="width: 600px">
     <div class="modal-content bg-primary">
         <div class="modal-header">

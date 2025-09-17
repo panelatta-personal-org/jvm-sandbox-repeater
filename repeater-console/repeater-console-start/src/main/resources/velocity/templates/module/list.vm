@@ -191,29 +191,54 @@
         
         $("#btn-install").on("click", function () {
             var modal = $('#start-install-modal');
+            
+            // 重置表单，确保干净的状态
+            modal.find('#startInstallForm')[0].reset();
+            // 重新设置端口的默认值
+            modal.find("input[name='port']").val('12580');
+            
             modal.on('shown.bs.modal', function () {
                 $(this).css('display', 'block');
                 var modalHeight = $(window).height() / 2 - $('#start-install-modal .modal-dialog').height() / 2;
                 $(this).find('.modal-dialog').css({
                     'margin-top': modalHeight
                 });
+                // 聚焦到第一个输入框
+                modal.find("input[name='appName']").focus();
             });
             modal.modal('show')
         })
 
         $("#start-install-btn").on('click', function () {
-            // 添加表单验证
-            var appName = $("input[name='appName']").val().trim();
-            var ip = $("input[name='ip']").val().trim();
-            var port = $("input[name='port']").val().trim();
+            // 限制选择器在模态框内部，避免与页面其他元素冲突
+            var modal = $('#start-install-modal');
+            var appName = modal.find("input[name='appName']").val();
+            var ip = modal.find("input[name='ip']").val();
+            var port = modal.find("input[name='port']").val();
             
+            // 清理输入值
+            appName = appName ? appName.trim() : '';
+            ip = ip ? ip.trim() : '';
+            port = port ? port.trim() : '';
+            
+            // 调试信息（开发时可以查看）
+            if (i18n.debug) {
+                console.log('[Form Validation] appName:', '"' + appName + '"');
+                console.log('[Form Validation] ip:', '"' + ip + '"');
+                console.log('[Form Validation] port:', '"' + port + '"');
+            }
+            
+            // 验证应用名
             if (!appName) {
                 alert(i18n.get('js.error.appname.required'));
+                modal.find("input[name='appName']").focus();
                 return;
             }
             
+            // 验证IP地址
             if (!ip) {
                 alert(i18n.get('js.error.ip.required'));
+                modal.find("input[name='ip']").focus();
                 return;
             }
             
@@ -221,12 +246,14 @@
             var ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
             if (!ipRegex.test(ip)) {
                 alert(i18n.get('js.error.ip.format'));
+                modal.find("input[name='ip']").focus();
                 return;
             }
             
             // 验证端口
             if (port && (isNaN(port) || port < 1 || port > 65535)) {
                 alert(i18n.get('js.error.port.range'));
+                modal.find("input[name='port']").focus();
                 return;
             }
             
@@ -250,6 +277,28 @@
                 }
             })
         });
+        
+        // 调试功能：在浏览器控制台中可以使用 debugModuleForm() 来检查表单状态
+        window.debugModuleForm = function() {
+            var modal = $('#start-install-modal');
+            var appName = modal.find("input[name='appName']").val();
+            var ip = modal.find("input[name='ip']").val();
+            var port = modal.find("input[name='port']").val();
+            
+            console.log('=== 模块注册表单调试信息 ===');
+            console.log('模态框是否可见:', modal.is(':visible'));
+            console.log('应用名输入框数量:', modal.find("input[name='appName']").length);
+            console.log('应用名原始值:', '"' + (appName || '') + '"');
+            console.log('应用名清理后:', '"' + (appName ? appName.trim() : '') + '"');
+            console.log('IP地址:', '"' + (ip || '') + '"');
+            console.log('端口号:', '"' + (port || '') + '"');
+            console.log('表单元素:', modal.find('#startInstallForm')[0]);
+            return {
+                appName: appName ? appName.trim() : '',
+                ip: ip ? ip.trim() : '',
+                port: port ? port.trim() : ''
+            };
+        };
     });
 </script>
 </body>

@@ -6,6 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.ResourceBundle;
 
 /**
  * 国际化API
@@ -124,92 +125,35 @@ public class I18nApi {
     
     /**
      * 加载指定语言的所有消息
-     * 这里只加载常用的消息，避免一次性加载过多
+     * 动态加载资源文件中的所有消息键，确保前端可以访问任何定义的消息
      */
     private Map<String, String> loadMessages(Locale locale) {
         Map<String, String> messages = new HashMap<>();
         
-        // 预定义需要加载的消息key列表
-        String[] keys = {
-            // 导航菜单
-            "nav.online.traffic", "nav.config.management", "nav.online.module",
-            // 页面标题
-            "title.online.traffic", "title.config.management", "title.online.module",
-            "title.call.detail", "title.replay.result", "title.config.add", "title.config.edit",
-            "title.config.detail", "title.module.list", "title.regress", "title.batch.replay",
-            // 按钮
-            "button.query", "button.add", "button.add.config", "button.edit",
-            "button.delete", "button.detail", "button.replay", "button.execute",
-            "button.cancel", "button.confirm", "button.submit", "button.save",
-            "button.batch.replay", "button.push", "button.activate", "button.install.module",
-            "button.refresh", "button.active", "button.select.all", "button.back", "button.reset",
-            // 表单标签
-            "label.app.name", "label.environment", "label.trace.id", "label.machine",
-            "label.ip", "label.entrance", "label.status", "label.time",
-            "label.create.time", "label.modify.time", "label.heartbeat.time",
-            "label.config.info", "label.operation", "label.host", "label.port",
-            "label.version", "label.mock",
-            // 表格列头
-            "table.app.name", "table.environment", "table.entrance", "table.trace.id",
-            "table.status", "table.time", "table.operation", "table.config.info",
-            "table.create.time", "table.modify.time", "table.heartbeat.time",
-            "table.host", "table.port", "table.version", "table.machine", "table.select.all",
-            // 表单字段
-            "form.config.content", "form.config.model", "form.module.name", 
-            "form.ip.address", "form.machine.ip", "form.scenario.name",
-            // 状态信息
-            "status.active", "status.inactive", "status.online", "status.offline",
-            "status.success", "status.failed",
-            // 提示信息
-            "msg.no.config", "msg.no.machine", "msg.no.data", "msg.network.error",
-            "msg.replay.success", "msg.loading", "msg.success", "msg.failed",
-            "msg.confirm.delete", "msg.confirm.operation", "msg.no.data.recorded",
-            "msg.no.replay.machine", "msg.install.success", "msg.activate.success",
-            "msg.push.success", "msg.select.records.first", "msg.confirm.batch.replay",
-            "msg.install.module.confirm", "msg.activate.module.confirm",
-            // 页面元素
-            "page.home", "page.breadcrumb", "page.new.badge", "page.call.list",
-            "page.recorded.data", "page.no.available.machine", "page.please.select.machine",
-            // 模态框标题
-            "modal.title.tip", "modal.title.start.replay", "modal.title.install.module",
-            "modal.title.confirm", "modal.title.batch.replay", "modal.title.select.machine",
-            // 回放页面相关
-            "page.replay.snapshot", "page.replay.result", "page.diff.nodes", "page.result.diff",
-            "page.mock.process", "page.expected.result", "page.actual.result",
-            "page.basic.info", "page.call.info", "page.request.params", "page.response.result",
-            "page.sub.invocations", "page.record.machine", "page.record.time", "page.record.environment",
-            "page.config.info", "page.config.help",
-            // 回放状态
-            "status.executing", "status.activated", "status.unactivated", "status.frozen",
-            // 回放专用表格标题
-            "table.execution.result", "table.execution.time", "table.execution.environment",
-            "table.execution.machine", "table.repeat.id", "table.execution.datetime",
-            "table.node", "table.expected.value", "table.actual.value", "table.reason",
-            "table.sequence", "table.record.identity", "table.replay.identity",
-            "table.record.params", "table.replay.params", "table.cost", "table.skip",
-            // 回放专用模态框
-            "modal.no.replay.machine", "modal.machine.label", "modal.mock.label",
-            "modal.mock.on", "modal.mock.off",
-            // 回放页面面包屑
-            "breadcrumb.call.detail", "breadcrumb.replay.result",
-            // 模块管理相关
-            "module.heartbeat.info", "module.no.heartbeat", "module.freeze", "module.reload",
-            "module.reload.plugin",
-            // 验证信息
-            "validation.app.name.required", "validation.environment.required",
-            // 其他
-            "other.version", "other.open", "other.close", "other.yes", "other.no", "other.all", "other.none",
-            "other.loading", "other.processing", "msg.no.diff.nodes", "msg.no.mock.process"
-        };
-        
-        for (String key : keys) {
-            try {
-                String message = messageSource.getMessage(key, null, locale);
-                messages.put(key, message);
-            } catch (Exception e) {
-                // 如果找不到消息，使用key本身
-                messages.put(key, key);
+        try {
+            // 动态获取资源包中的所有键
+            ResourceBundle bundle = ResourceBundle.getBundle("i18n.messages", locale);
+            Enumeration<String> keys = bundle.getKeys();
+            
+            while (keys.hasMoreElements()) {
+                String key = keys.nextElement();
+                try {
+                    String message = messageSource.getMessage(key, null, locale);
+                    messages.put(key, message);
+                } catch (Exception e) {
+                    // 如果MessageSource无法获取消息，直接从ResourceBundle获取
+                    try {
+                        String message = bundle.getString(key);
+                        messages.put(key, message);
+                    } catch (Exception ex) {
+                        // 最后的fallback，使用key本身
+                        messages.put(key, key);
+                    }
+                }
             }
+        } catch (Exception e) {
+            // 如果ResourceBundle加载失败，记录错误并返回空Map
+            System.err.println("Failed to load ResourceBundle for locale: " + locale + ", error: " + e.getMessage());
         }
         
         return messages;

@@ -12,6 +12,9 @@ var i18n = {
     // 支持的语言列表
     supportedLocales: [],
     
+    // 调试模式开关（可在浏览器控制台中通过 i18n.debug = true 开启）
+    debug: false,
+    
     /**
      * 初始化国际化模块
      * @param locale 指定的语言，如果不指定则从Cookie中获取
@@ -42,9 +45,12 @@ var i18n = {
             async: false,
             success: function(data) {
                 self.messages = data;
+                if (self.debug) {
+                    console.log('[i18n] Loaded ' + Object.keys(data).length + ' messages for locale: ' + self.locale);
+                }
             },
             error: function() {
-                console.error('Failed to load i18n messages');
+                console.error('[i18n] Failed to load i18n messages for locale: ' + self.locale);
                 self.messages = {};
             }
         });
@@ -79,7 +85,15 @@ var i18n = {
      * @returns {string} 国际化后的消息
      */
     get: function(key) {
-        var message = this.messages[key] || key;
+        var message = this.messages[key];
+        
+        // 调试支持：如果找不到消息键，记录警告
+        if (!message) {
+            if (this.debug) {
+                console.warn('[i18n] Message key not found: "' + key + '" for locale: ' + this.locale);
+            }
+            message = key; // 使用键名作为fallback
+        }
         
         // 处理参数替换
         if (arguments.length > 1) {
@@ -182,6 +196,50 @@ var i18n = {
      */
     isEnglish: function() {
         return this.locale.indexOf('en') === 0;
+    },
+    
+    /**
+     * 调试功能：列出所有可用的消息键
+     * 在浏览器控制台中使用：i18n.listKeys()
+     */
+    listKeys: function() {
+        var keys = Object.keys(this.messages);
+        console.log('[i18n] Available message keys (' + keys.length + ' total):');
+        keys.sort().forEach(function(key) {
+            console.log('  - ' + key + ': "' + this.messages[key] + '"', '');
+        }.bind(this));
+        return keys;
+    },
+    
+    /**
+     * 调试功能：搜索包含指定文本的消息键
+     * @param {string} searchText 搜索文本
+     */
+    searchKeys: function(searchText) {
+        if (!searchText) {
+            console.warn('[i18n] Please provide search text');
+            return [];
+        }
+        
+        var results = [];
+        var keys = Object.keys(this.messages);
+        
+        keys.forEach(function(key) {
+            if (key.toLowerCase().indexOf(searchText.toLowerCase()) !== -1 || 
+                this.messages[key].toLowerCase().indexOf(searchText.toLowerCase()) !== -1) {
+                results.push({
+                    key: key,
+                    value: this.messages[key]
+                });
+            }
+        }.bind(this));
+        
+        console.log('[i18n] Search results for "' + searchText + '" (' + results.length + ' found):');
+        results.forEach(function(result) {
+            console.log('  - ' + result.key + ': "' + result.value + '"');
+        });
+        
+        return results;
     }
 };
 

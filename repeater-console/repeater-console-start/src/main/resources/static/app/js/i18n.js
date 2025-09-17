@@ -3,6 +3,8 @@
  * 提供前端页面的国际化支持
  */
 var i18n = {
+    // 创建本地jQuery引用，避免与noConflict冲突
+    $: window.jQuery || window.$,
     // 当前语言
     locale: 'zh_CN',
     
@@ -38,7 +40,7 @@ var i18n = {
      */
     loadMessages: function() {
         var self = this;
-        $.ajax({
+        this.$.ajax({
             url: '/api/i18n/messages',
             type: 'GET',
             data: { locale: this.locale },
@@ -61,7 +63,7 @@ var i18n = {
      */
     loadSupportedLocales: function() {
         var self = this;
-        $.ajax({
+        this.$.ajax({
             url: '/api/i18n/supported-locales',
             type: 'GET',
             async: false,

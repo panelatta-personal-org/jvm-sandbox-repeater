@@ -362,12 +362,17 @@
         // 定义按钮状态管理函数
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
+                var originalText = button.data('original-text') || button.html();
+                button.data('original-text', originalText);
+                
                 button.prop('disabled', true)
                        .html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('button.registering'))
                        .addClass('btn-loading');
             } else {
+                var originalText = button.data('original-text') || i18n.get('button.register');
+                
                 button.prop('disabled', false)
-                       .html(i18n.get('button.register.module'))
+                       .html(originalText)
                        .removeClass('btn-loading');
             }
         }
@@ -490,7 +495,31 @@
             });
         }
 
+        // 页面上的"注册远程模块"按钮：只显示模态框
         jq("#btn-install").on('click', function () {
+            var modal = jq('#start-install-modal');
+            
+            // 重置表单，确保干净的状态
+            modal.find('#startInstallForm')[0].reset();
+            // 重新设置默认值
+            modal.find("input[name='port']").val('12580');
+            modal.find("select[name='environment']").val('default');
+            
+            // 显示模态框
+            modal.modal('show');
+            
+            // 模态框显示后聚焦到第一个输入框
+            modal.on('shown.bs.modal', function () {
+                jq(this).find("input[name='appName']").focus();
+            });
+            
+            if (i18n.debug) {
+                console.log('[Modal] 显示注册模态框');
+            }
+        });
+        
+        // 模态框内的"注册"按钮：执行注册逻辑
+        jq("#start-install-btn").on('click', function () {
             var button = jq(this);
             
             // 限制选择器在模态框内部，避免与页面其他元素冲突
@@ -645,7 +674,8 @@
             console.log('端口号:', '"' + (port || '') + '"');
             console.log('运行环境:', '"' + (environment || '') + '"');
             console.log('表单元素:', modal.find('#startInstallForm')[0]);
-            console.log('按钮状态:', jq('#btn-install').prop('disabled'));
+            console.log('页面按钮状态:', jq('#btn-install').prop('disabled'));
+            console.log('模态框按钮状态:', jq('#start-install-btn').prop('disabled'));
             console.log('Loading状态:', jq('#modal-loading').is(':visible'));
             return {
                 appName: appName ? appName.trim() : '',

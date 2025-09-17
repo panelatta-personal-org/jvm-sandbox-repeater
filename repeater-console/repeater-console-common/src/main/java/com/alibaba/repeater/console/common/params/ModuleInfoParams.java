@@ -13,7 +13,11 @@ import lombok.Setter;
 @Setter
 public class ModuleInfoParams extends BaseParams {
 
+    private String appName;
+    
     private String ip;
     
     private String port;
+    
+    private String environment;
 }

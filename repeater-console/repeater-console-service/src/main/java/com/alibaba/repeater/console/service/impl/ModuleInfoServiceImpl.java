@@ -122,6 +122,9 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
         // 设置默认端口
         String port = StringUtils.isEmpty(params.getPort()) ? "12580" : params.getPort();
         
+        // 设置默认环境
+        String environment = StringUtils.isEmpty(params.getEnvironment()) ? "default" : params.getEnvironment();
+        
         // 验证端口范围
         try {
             int portNum = Integer.parseInt(port);
@@ -149,7 +152,7 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
                     params.getIp(), port, resp.getMessage()));
             }
             
-            // 3. 进一步验证repeater模块是否存在
+            // 3. 进一步验证repeater模块是否存在并获取版本信息
             String repeaterCheckUrl = String.format(
                 "http://%s:%s/sandbox/default/module/http/sandbox-module-mgr/detail?id=repeater", 
                 params.getIp(), port);
@@ -160,34 +163,25 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
                     params.getIp(), port));
             }
             
-            // 4. 注册模块信息到数据库
+            // 4. 解析版本信息
+            String version = parseVersionFromSandboxResponse(repeaterResp.getBody());
+            
+            // 5. 注册模块信息到数据库
             ModuleInfo moduleInfo = new ModuleInfo();
             moduleInfo.setAppName(params.getAppName());
             moduleInfo.setIp(params.getIp());
-            moduleInfo.setPort(port); // 使用用户输入的端口
+            moduleInfo.setPort(port);
+            moduleInfo.setEnvironment(environment);  // 设置环境
+            moduleInfo.setVersion(version);          // 设置解析得到的版本
             moduleInfo.setStatus(ModuleStatus.ACTIVE.name());
             moduleInfo.setGmtCreate(new Date());
             moduleInfo.setGmtModified(new Date());
-            
-            // 5. 尝试获取模块版本信息（可选）
-            try {
-                String versionUrl = String.format(
-                    "http://%s:%s/sandbox/default/module/http/sandbox-module-mgr/detail?id=repeater", 
-                    params.getIp(), port);
-                HttpUtil.Resp versionResp = HttpUtil.doGet(versionUrl);
-                if (versionResp.isSuccess()) {
-                    // 这里可以解析响应获取版本信息
-                    // moduleInfo.setVersion(parseVersion(versionResp.getContent()));
-                }
-            } catch (Exception e) {
-                // 获取版本信息失败不影响注册
-            }
             
             moduleInfoDao.save(moduleInfo);
             
             return ResultHelper.success(getMessage("success.module.registered"), 
                 getMessage("success.module.registered.detail", 
-                    params.getAppName(), params.getIp(), port));
+                    params.getAppName(), params.getIp(), port, environment, version));
                 
         } catch (Exception e) {
             return ResultHelper.fail(getMessage("error.registration.failed", e.getMessage()));
@@ -239,5 +233,72 @@ public class ModuleInfoServiceImpl implements ModuleInfoService {
         moduleInfoDao.delete(moduleInfo);
         return ResultHelper.success(getMessage("success.module.removed", 
             moduleInfo.getIp(), moduleInfo.getPort()));
+    }
+
+    /**
+     * 从sandbox响应中解析版本信息
+     * @param responseContent sandbox API响应内容
+     * @return 版本信息，解析失败时返回"unknown"
+     */
+    private String parseVersionFromSandboxResponse(String responseContent) {
+        try {
+            if (StringUtils.isEmpty(responseContent)) {
+                return "unknown";
+            }
+            
+            // 方法1：专门处理sandbox文本格式（优先级最高）
+            // 匹配实际格式：" VERSION : 1.0.0"
+            java.util.regex.Pattern sandboxTextPattern = java.util.regex.Pattern.compile(
+                "VERSION\\s*:\\s*([0-9\\.\\-a-zA-Z]+)", 
+                java.util.regex.Pattern.CASE_INSENSITIVE
+            );
+            java.util.regex.Matcher sandboxMatcher = sandboxTextPattern.matcher(responseContent);
+            if (sandboxMatcher.find()) {
+                return sandboxMatcher.group(1);
+            }
+            
+            // 方法2：处理JSON格式（向后兼容）
+            // 匹配格式：{"version":"1.0.0"} 或 "version": "1.0.0"
+            java.util.regex.Pattern jsonPattern = java.util.regex.Pattern.compile(
+                "\"version\"\\s*:\\s*\"([^\"]+)\"", 
+                java.util.regex.Pattern.CASE_INSENSITIVE
+            );
+            java.util.regex.Matcher jsonMatcher = jsonPattern.matcher(responseContent);
+            if (jsonMatcher.find()) {
+                return jsonMatcher.group(1);
+            }
+            
+            // 方法3：通用版本模式（支持多种分隔符）
+            // 匹配格式：version=1.0.0, version: 1.0.0, version 1.0.0 等
+            java.util.regex.Pattern generalPattern = java.util.regex.Pattern.compile(
+                "version[\"\\s]*[:=\\s]+[\"\\s]*([0-9\\.\\-a-zA-Z]+)", 
+                java.util.regex.Pattern.CASE_INSENSITIVE
+            );
+            java.util.regex.Matcher generalMatcher = generalPattern.matcher(responseContent);
+            if (generalMatcher.find()) {
+                return generalMatcher.group(1);
+            }
+            
+            // 方法4：查找数字版本号（兜底方案）
+            // 在包含repeater关键字的响应中查找符合版本号模式的字符串
+            if (responseContent.toLowerCase().contains("repeater")) {
+                java.util.regex.Pattern numberPattern = java.util.regex.Pattern.compile(
+                    "([0-9]+\\.[0-9]+\\.[0-9]+(?:-[a-zA-Z0-9]+)?)"
+                );
+                java.util.regex.Matcher numberMatcher = numberPattern.matcher(responseContent);
+                if (numberMatcher.find()) {
+                    return numberMatcher.group(1);
+                }
+                
+                // 如果找到repeater但没有符合标准的版本号，返回默认版本
+                return "1.0.0";
+            }
+            
+            return "unknown";
+            
+        } catch (Exception e) {
+            // 解析失败时记录日志但不影响注册流程
+            return "unknown";
+        }
     }
 }

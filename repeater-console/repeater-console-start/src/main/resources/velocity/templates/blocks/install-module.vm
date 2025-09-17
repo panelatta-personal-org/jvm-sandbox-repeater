@@ -26,11 +26,24 @@
                                 <input type="text" class="form-control form-control-sm" name="ip" autocomplete="off" placeholder="$i18n.get('form.ip.placeholder')" style="width: 300px" required>
                             </div>
                         </div>
-                        <div class="form-group" id="machine-select-group" style="width: 100%;">
+                        <div class="form-group" id="machine-select-group" style="margin-bottom: 15px; width: 100%;">
                             <label for="port" class="col-3 control-label">$i18n.get("form.port.label")</label>
                             <div class="col-8">
                                 <input type="number" class="form-control form-control-sm" name="port" autocomplete="off" placeholder="$i18n.get('form.port.placeholder')" value="12580" min="1" max="65535" style="width: 300px">
                                 <small class="form-text text-muted">$i18n.get("form.port.help")</small>
+                            </div>
+                        </div>
+                        <div class="form-group" id="machine-select-group" style="width: 100%;">
+                            <label for="environment" class="col-3 control-label">$i18n.get("form.environment.label")</label>
+                            <div class="col-8">
+                                <select class="form-control form-control-sm" name="environment" style="width: 300px">
+                                    <option value="default">$i18n.get("environment.default")</option>
+                                    <option value="dev">$i18n.get("environment.dev")</option>
+                                    <option value="test">$i18n.get("environment.test")</option>
+                                    <option value="staging">$i18n.get("environment.staging")</option>
+                                    <option value="prod">$i18n.get("environment.prod")</option>
+                                </select>
+                                <small class="form-text text-muted">$i18n.get("form.environment.help")</small>
                             </div>
                         </div>
                     </form>

@@ -267,6 +267,8 @@
             modal.find('#startInstallForm')[0].reset();
             // 重新设置端口的默认值
             modal.find("input[name='port']").val('12580');
+            // 重新设置环境的默认值
+            modal.find("select[name='environment']").val('default');
             
             modal.on('shown.bs.modal', function () {
                 $(this).css('display', 'block');
@@ -421,17 +423,20 @@
             var appName = modal.find("input[name='appName']").val();
             var ip = modal.find("input[name='ip']").val();
             var port = modal.find("input[name='port']").val();
+            var environment = modal.find("select[name='environment']").val();
             
             // 清理输入值
             appName = appName ? appName.trim() : '';
             ip = ip ? ip.trim() : '';
             port = port ? port.trim() : '';
+            environment = environment || 'default';
             
             // 调试信息（开发时可以查看）
             if (i18n.debug) {
                 console.log('[Form Validation] appName:', '"' + appName + '"');
                 console.log('[Form Validation] ip:', '"' + ip + '"');
                 console.log('[Form Validation] port:', '"' + port + '"');
+                console.log('[Form Validation] environment:', '"' + environment + '"');
             }
             
             // 验证应用名
@@ -554,6 +559,7 @@
             var appName = modal.find("input[name='appName']").val();
             var ip = modal.find("input[name='ip']").val();
             var port = modal.find("input[name='port']").val();
+            var environment = modal.find("select[name='environment']").val();
             
             console.log('=== 模块注册表单调试信息 ===');
             console.log('模态框是否可见:', modal.is(':visible'));
@@ -562,13 +568,15 @@
             console.log('应用名清理后:', '"' + (appName ? appName.trim() : '') + '"');
             console.log('IP地址:', '"' + (ip || '') + '"');
             console.log('端口号:', '"' + (port || '') + '"');
+            console.log('运行环境:', '"' + (environment || '') + '"');
             console.log('表单元素:', modal.find('#startInstallForm')[0]);
             console.log('按钮状态:', $('#start-install-btn').prop('disabled'));
             console.log('Loading状态:', $('#modal-loading').is(':visible'));
             return {
                 appName: appName ? appName.trim() : '',
                 ip: ip ? ip.trim() : '',
-                port: port ? port.trim() : ''
+                port: port ? port.trim() : '',
+                environment: environment || 'default'
             };
         };
 
@@ -578,7 +586,8 @@
                 testData = {
                     appName: 'test-app',
                     ip: '127.0.0.1',
-                    port: '12580'
+                    port: '12580',
+                    environment: 'test'
                 };
             }
             
@@ -590,6 +599,7 @@
             modal.find("input[name='appName']").val(testData.appName);
             modal.find("input[name='ip']").val(testData.ip);
             modal.find("input[name='port']").val(testData.port);
+            modal.find("select[name='environment']").val(testData.environment || 'default');
             
             console.log('表单已填充，可以手动点击注册按钮测试');
             
@@ -622,6 +632,93 @@
             return i18n.messages;
         };
 
+        // 版本解析调试功能
+        window.debugVersionParsing = function(sampleResponse) {
+            // 默认使用实际的sandbox响应格式
+            var realSandboxResponse = `      ID : repeater
+ VERSION : 1.0.0
+  AUTHOR : zhaoyb1990
+JAR_FILE : /root/.sandbox-module/repeater-module.jar
+   STATE : ACTIVE
+    MODE : {AGENT,ATTACH}
+   CLASS : com.alibaba.jvm.sandbox.repeater.module.RepeaterModule
+  LOADER : ModuleJarClassLoader[crc32=3909007247;file=/root/.sandbox-module/repeater-module.jar;]
+    cCnt : 0
+    mCnt : 0`;
+
+            var testResponse = sampleResponse || realSandboxResponse;
+            
+            console.log('=== 版本解析测试 ===');
+            console.log('测试响应:', testResponse);
+            
+            // 模拟前端版本解析逻辑（与后端保持一致）
+            function parseVersion(responseContent) {
+                try {
+                    if (!responseContent) return 'unknown';
+                    
+                    // 方法1：专门处理sandbox文本格式（优先级最高）
+                    var sandboxPattern = /VERSION\s*:\s*([0-9\.\-a-zA-Z]+)/i;
+                    var sandboxMatch = responseContent.match(sandboxPattern);
+                    if (sandboxMatch) return sandboxMatch[1];
+                    
+                    // 方法2：处理JSON格式（向后兼容）
+                    var jsonPattern = /"version"\s*:\s*"([^"]+)"/i;
+                    var jsonMatch = responseContent.match(jsonPattern);
+                    if (jsonMatch) return jsonMatch[1];
+                    
+                    // 方法3：通用版本模式
+                    var generalPattern = /version["\s]*[:=\s]+["\s]*([0-9\.\-a-zA-Z]+)/i;
+                    var generalMatch = responseContent.match(generalPattern);
+                    if (generalMatch) return generalMatch[1];
+                    
+                    // 方法4：查找数字版本号
+                    if (responseContent.toLowerCase().indexOf('repeater') !== -1) {
+                        var numberPattern = /([0-9]+\.[0-9]+\.[0-9]+(?:-[a-zA-Z0-9]+)?)/;
+                        var numberMatch = responseContent.match(numberPattern);
+                        if (numberMatch) return numberMatch[1];
+                        return '1.0.0';
+                    }
+                    
+                    return 'unknown';
+                } catch (e) {
+                    return 'unknown';
+                }
+            }
+            
+            var parsedVersion = parseVersion(testResponse);
+            console.log('解析结果:', parsedVersion);
+            
+            // 测试多种响应格式（包括实际格式）
+            var testCases = [
+                // 实际的sandbox文本格式
+                realSandboxResponse,
+                // 不同版本的sandbox格式
+                'VERSION : 2.1.0-SNAPSHOT',
+                'Version: 1.5.3',
+                // JSON格式
+                '{"success":true,"data":{"id":"repeater","version":"1.2.3","status":"ACTIVE"}}',
+                '{"success":true,"module":{"name":"repeater","version":"2.0.0-SNAPSHOT"}}',
+                // 其他格式
+                'version: "1.5.0", module: repeater',
+                'repeater module version=1.1.1',
+                'version 3.0.0 repeater',
+                // 边界情况
+                'invalid response without version info',
+                'repeater module without version',
+                ''
+            ];
+            
+            console.log('多种格式测试:');
+            testCases.forEach(function(testCase, index) {
+                var result = parseVersion(testCase);
+                var preview = testCase.length > 50 ? testCase.substring(0, 50) + '...' : testCase;
+                preview = preview.replace(/\n/g, '\\n'); // 处理换行符显示
+                console.log('  测试' + (index + 1) + ':', result, '(响应:', preview + ')');
+            });
+            
+            return parsedVersion;
+        };
+
         // 性能调试功能
         window.debugPerformance = function() {
             console.log('=== 性能调试信息 ===');
@@ -640,6 +737,7 @@
             console.log('  debugModuleForm() - 检查表单状态');
             console.log('  debugRequestFlow(testData) - 模拟请求流程');
             console.log('  debugI18n() - 国际化调试');
+            console.log('  debugVersionParsing(response) - 版本解析测试');
             console.log('  debugPerformance() - 性能调试');
             console.log('  disableDebugMode() - 关闭调试模式');
         };

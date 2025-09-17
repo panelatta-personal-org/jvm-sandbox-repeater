@@ -145,4 +145,22 @@ public class ModuleConfigController {
         return moduleConfigService.debugMatchingAnalysis(appName, environment);
     }
 
+    /**
+     * K8S实例信息调试
+     */
+    @RequestMapping("k8sInstanceInfo.json")
+    @ResponseBody
+    public RepeaterResult<Object> k8sInstanceInfo() {
+        return moduleConfigService.getK8sInstanceInfo();
+    }
+
+    /**
+     * K8S数据库连接信息调试
+     */
+    @RequestMapping("k8sDatabaseInfo.json")
+    @ResponseBody
+    public RepeaterResult<Object> k8sDatabaseInfo() {
+        return moduleConfigService.getK8sDatabaseInfo();
+    }
+
 }

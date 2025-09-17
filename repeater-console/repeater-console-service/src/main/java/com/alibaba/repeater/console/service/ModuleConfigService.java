@@ -45,4 +45,14 @@ public interface ModuleConfigService {
      * 调试匹配分析
      */
     RepeaterResult<Object> debugMatchingAnalysis(String appName, String environment);
+
+    /**
+     * 获取K8S实例信息
+     */
+    RepeaterResult<Object> getK8sInstanceInfo();
+
+    /**
+     * 获取K8S数据库连接信息
+     */
+    RepeaterResult<Object> getK8sDatabaseInfo();
 }

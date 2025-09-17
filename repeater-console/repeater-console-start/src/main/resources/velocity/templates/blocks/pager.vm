@@ -2,23 +2,23 @@
 <ul class="pagination pagination-sm m-0 float-right">
     #if($pagerWrapper.hasPrevious)
         <li class="page-item">
-            <a class="page-link" href="$pagerWrapper.url&page=1" title="首页">
+            <a class="page-link" href="$pagerWrapper.url&page=1" title="$i18n.get('pagination.first')">
                 <i class="fa fa-fw fa-angle-double-left"></i>
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.previous" title="上一页">
+            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.previous" title="$i18n.get('pagination.previous')">
                 <i class="fa fa-fw fa-angle-left"></i>
             </a>
         </li>
     #else
         <li class="page-item disabled">
-            <a class="page-link" href="javascript:viod(0)" title="首页">
+            <a class="page-link" href="javascript:viod(0)" title="$i18n.get('pagination.first')">
                 <i class="fa fa-fw fa-angle-double-left"></i>
             </a>
         </li>
         <li class="page-item disabled">
-            <a class="page-link" href="javascript:viod(0)" title="上一页">
+            <a class="page-link" href="javascript:viod(0)" title="$i18n.get('pagination.previous')">
                 <i class="fa fa-fw fa-angle-left"></i>
             </a>
         </li>
@@ -36,23 +36,23 @@
     #end
     #if($pagerWrapper.hasNext)
         <li class="page-item">
-            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.next" title="下一页">
+            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.next" title="$i18n.get('pagination.next')">
                 <i class="fa fa-fw fa-angle-right"></i>
             </a>
         </li>
         <li class="page-item">
-            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.total" title="尾页">
+            <a class="page-link" href="$pagerWrapper.url&page=$pagerWrapper.total" title="$i18n.get('pagination.last')">
                 <i class="fa fa-fw fa-angle-double-right"></i>
             </a>
         </li>
     #else
         <li class="page-item disabled">
-            <a class="page-link" href="javascript:void(0)" title="下一页">
+            <a class="page-link" href="javascript:void(0)" title="$i18n.get('pagination.next')">
                 <i class="fa fa-fw fa-angle-right"></i>
             </a>
         </li>
         <li class="page-item disabled">
-            <a class="page-link" href="javascript:void(0)" title="尾页">
+            <a class="page-link" href="javascript:void(0)" title="$i18n.get('pagination.last')">
                 <i class="fa fa-fw fa-angle-double-right"></i>
             </a>
         </li>

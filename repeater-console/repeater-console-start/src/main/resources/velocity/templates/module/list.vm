@@ -171,14 +171,14 @@
                             <div class="card-tools">
                                 <div class="btn-group float-right" role="group" style="margin-right: 10px;">
                                     <button id="btn-refresh-status" type="button" class="btn btn-info btn-sm" 
-                                            title="手动刷新所有模块状态" onclick="refreshAllStatus()">
+                                            title="$i18n.get('monitor.refresh.all.status')" onclick="refreshAllStatus()">
                                         <i class="fa fa-refresh"></i>
-                                        刷新状态
+                                        $i18n.get("status.monitor.refresh")
                                     </button>
                                     <button id="btn-toggle-monitor" type="button" class="btn btn-success btn-sm" 
-                                            title="开启/关闭自动状态监控" onclick="toggleMonitorButton()">
+                                            title="$i18n.get('monitor.toggle.auto')" onclick="toggleMonitorButton()">
                                         <i class="fa fa-play"></i>
-                                        <span id="monitor-status-text">监控中</span>
+                                        <span id="monitor-status-text">$i18n.get("monitor.status.monitoring")</span>
                                     </button>
                                 </div>
                                 <button type="button" class="btn btn-primary btn-sm float-right"
@@ -224,7 +224,7 @@
                                         <th>$i18n.get("table.port")</th>
                                         <th>$i18n.get("table.version")</th>
                                         <th>$i18n.get("label.status")</th>
-                                        <th>连接状态</th>
+                                        <th>$i18n.get("connection.status")</th>
                                         <th>$i18n.get("label.heartbeat.time")</th>
                                         <th width="120px">$i18n.get("table.operation")</th>
                                     </tr>
@@ -246,8 +246,8 @@
                                             </td>
                                             <td style="vertical-align: middle">
                                                 <div class="status-indicators">
-                                                    <i class="fa fa-circle text-muted" title="未检测"></i>
-                                                    <span class="badge badge-secondary">待检测</span>
+                                                    <i class="fa fa-circle text-muted" title="$i18n.get('connection.not.detected')"></i>
+                                                    <span class="badge badge-secondary">$i18n.get("connection.not.detected")</span>
                                                 </div>
                                                 <div class="operation-status"></div>
                                             </td>
@@ -682,18 +682,18 @@
             var port = modal.find("input[name='port']").val();
             var environment = modal.find("input[name='environment']").val();
             
-            console.log('=== 模块注册表单调试信息 ===');
-            console.log('模态框是否可见:', modal.is(':visible'));
-            console.log('应用名输入框数量:', modal.find("input[name='appName']").length);
-            console.log('应用名原始值:', '"' + (appName || '') + '"');
-            console.log('应用名清理后:', '"' + (appName ? appName.trim() : '') + '"');
-            console.log('IP地址:', '"' + (ip || '') + '"');
-            console.log('端口号:', '"' + (port || '') + '"');
-            console.log('运行环境:', '"' + (environment || '') + '"');
-            console.log('表单元素:', modal.find('#startInstallForm')[0]);
-            console.log('页面按钮状态:', jq('#btn-install').prop('disabled'));
-            console.log('模态框按钮状态:', jq('#start-install-btn').prop('disabled'));
-            console.log('Loading状态:', jq('#modal-loading').is(':visible'));
+            console.log('=== ' + i18n.get('debug.module.form.info') + ' ===');
+            console.log(i18n.get('debug.modal.visible') + ':', modal.is(':visible'));
+            console.log(i18n.get('debug.app.name.input.count') + ':', modal.find("input[name='appName']").length);
+            console.log(i18n.get('debug.app.name.original') + ':', '"' + (appName || '') + '"');
+            console.log(i18n.get('debug.app.name.cleaned') + ':', '"' + (appName ? appName.trim() : '') + '"');
+            console.log(i18n.get('debug.ip.address') + ':', '"' + (ip || '') + '"');
+            console.log(i18n.get('debug.port.number') + ':', '"' + (port || '') + '"');
+            console.log(i18n.get('debug.environment') + ':', '"' + (environment || '') + '"');
+            console.log(i18n.get('debug.form.element') + ':', modal.find('#startInstallForm')[0]);
+            console.log(i18n.get('debug.page.button.status') + ':', jq('#btn-install').prop('disabled'));
+            console.log(i18n.get('debug.modal.button.status') + ':', jq('#start-install-btn').prop('disabled'));
+            console.log(i18n.get('debug.loading.status') + ':', jq('#modal-loading').is(':visible'));
             return {
                 appName: appName ? appName.trim() : '',
                 ip: ip ? ip.trim() : '',
@@ -713,8 +713,8 @@
                 };
             }
             
-            console.log('=== 模拟请求流程调试 ===');
-            console.log('测试数据:', testData);
+            console.log('=== ' + i18n.get('debug.request.flow.simulation') + ' ===');
+            console.log(i18n.get('debug.test.data') + ':', testData);
             
             // 填充表单
             var modal = jq('#start-install-modal');
@@ -723,7 +723,7 @@
             modal.find("input[name='port']").val(testData.port);
             modal.find("input[name='environment']").val(testData.environment || 'default');
             
-            console.log('表单已填充，可以手动点击注册按钮测试');
+            console.log(i18n.get('debug.form.filled.manual.test'));
             
             // 显示模态框（如果未显示）
             if (!modal.is(':visible')) {
@@ -733,10 +733,10 @@
 
         // 国际化调试功能
         window.debugI18n = function() {
-            console.log('=== 国际化调试信息 ===');
-            console.log('当前语言环境:', navigator.language);
-            console.log('调试模式:', i18n.debug);
-            console.log('已加载消息数量:', Object.keys(i18n.messages || {}).length);
+            console.log('=== ' + i18n.get('debug.i18n.info') + ' ===');
+            console.log(i18n.get('debug.current.language') + ':', navigator.language);
+            console.log(i18n.get('debug.debug.mode') + ':', i18n.debug);
+            console.log(i18n.get('debug.loaded.message.count') + ':', Object.keys(i18n.messages || {}).length);
             
             // 测试关键消息
             var testKeys = [
@@ -746,7 +746,7 @@
                 'modal.retry.title'
             ];
             
-            console.log('关键消息测试:');
+            console.log(i18n.get('debug.key.message.test') + ':');
             testKeys.forEach(function(key) {
                 console.log('  ' + key + ':', i18n.get(key));
             });
@@ -770,8 +770,8 @@
 
             var testResponse = sampleResponse || realSandboxResponse;
             
-            console.log('=== 版本解析测试 ===');
-            console.log('测试响应:', testResponse);
+            console.log('=== ' + i18n.get('debug.version.parse.test') + ' ===');
+            console.log(i18n.get('debug.test.response') + ':', testResponse);
             
             // 模拟前端版本解析逻辑（与后端保持一致）
             function parseVersion(responseContent) {
@@ -808,7 +808,7 @@
             }
             
             var parsedVersion = parseVersion(testResponse);
-            console.log('解析结果:', parsedVersion);
+            console.log(i18n.get('debug.parse.result') + ':', parsedVersion);
             
             // 测试多种响应格式（包括实际格式）
             var testCases = [
@@ -830,12 +830,12 @@
                 ''
             ];
             
-            console.log('多种格式测试:');
+            console.log(i18n.get('debug.multi.format.test') + ':');
             testCases.forEach(function(testCase, index) {
                 var result = parseVersion(testCase);
                 var preview = testCase.length > 50 ? testCase.substring(0, 50) + '...' : testCase;
                 preview = preview.replace(/\n/g, '\\n'); // 处理换行符显示
-                console.log('  测试' + (index + 1) + ':', result, '(响应:', preview + ')');
+                console.log('  测试' + (index + 1) + ':', result, '(' + i18n.get('debug.test.response') + ':', preview + ')');
             });
             
             return parsedVersion;
@@ -843,30 +843,30 @@
 
         // 性能调试功能
         window.debugPerformance = function() {
-            console.log('=== 性能调试信息 ===');
-            console.log('页面加载时间:', performance.now() + 'ms');
-            console.log('DOM元素数量:', document.querySelectorAll('*').length);
-            console.log('jQuery版本:', jq.fn.jquery);
-            console.log('Bootstrap模态框数量:', jq('.modal').length);
-            console.log('内存使用:', performance.memory ? performance.memory : '不支持');
+            console.log('=== ' + i18n.get('debug.performance.info') + ' ===');
+            console.log(i18n.get('debug.page.load.time') + ':', performance.now() + 'ms');
+            console.log(i18n.get('debug.dom.element.count') + ':', document.querySelectorAll('*').length);
+            console.log(i18n.get('debug.jquery.version') + ':', jq.fn.jquery);
+            console.log(i18n.get('debug.bootstrap.modal.count') + ':', jq('.modal').length);
+            console.log(i18n.get('debug.memory.usage') + ':', performance.memory ? performance.memory : i18n.get('debug.not.supported'));
         };
 
         // 全局调试开关
         window.enableDebugMode = function() {
             i18n.debug = true;
-            console.log('=== 调试模式已开启 ===');
-            console.log('可用调试功能:');
-            console.log('  debugModuleForm() - 检查表单状态');
-            console.log('  debugRequestFlow(testData) - 模拟请求流程');
-            console.log('  debugI18n() - 国际化调试');
-            console.log('  debugVersionParsing(response) - 版本解析测试');
-            console.log('  debugPerformance() - 性能调试');
-            console.log('  disableDebugMode() - 关闭调试模式');
+            console.log('=== ' + i18n.get('debug.mode.enabled') + ' ===');
+            console.log(i18n.get('debug.available.functions') + ':');
+            console.log('  debugModuleForm() - ' + i18n.get('debug.check.form.status'));
+            console.log('  debugRequestFlow(testData) - ' + i18n.get('debug.simulate.request.flow'));
+            console.log('  debugI18n() - ' + i18n.get('debug.i18n.debug'));
+            console.log('  debugVersionParsing(response) - ' + i18n.get('debug.version.parse.test.func'));
+            console.log('  debugPerformance() - ' + i18n.get('debug.performance.debug'));
+            console.log('  disableDebugMode() - ' + i18n.get('debug.close.debug.mode'));
         };
 
         window.disableDebugMode = function() {
             i18n.debug = false;
-            console.log('调试模式已关闭');
+            console.log(i18n.get('debug.mode.disabled'));
         };
         
         // 按钮状态管理函数
@@ -892,7 +892,7 @@
                     case 'registering':
                     case 'default':
                     default:
-                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + (i18n.get('button.registering') || '处理中...');
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + (i18n.get('button.registering') || i18n.get('operation.processing'));
                 }
                 
                 jqBtn.prop('disabled', true)
@@ -980,7 +980,7 @@
                     operationText = i18n.get('operation.removing');
                     break;
                 default:
-                    operationText = '处理中...';
+                    operationText = i18n.get('operation.processing');
             }
             
             var progressHtml = '<div class="operation-progress">' +
@@ -1004,20 +1004,20 @@
             
             switch(status) {
                 case 'reload-success':
-                    statusHtml = '<i class="fa fa-circle text-success" title="最近reload成功"></i>' +
+                    statusHtml = '<i class="fa fa-circle text-success" title="' + i18n.get('operation.reload.success.recent') + '"></i>' +
                         '<span class="badge badge-success">' + i18n.get('operation.reload.success') + '</span>';
                     break;
                 case 'reload-failed':
-                    statusHtml = '<i class="fa fa-circle text-danger" title="reload失败"></i>' +
+                    statusHtml = '<i class="fa fa-circle text-danger" title="' + i18n.get('operation.reload.failed.recent') + '"></i>' +
                         '<span class="badge badge-danger">' + i18n.get('operation.reload.failed') + '</span>';
                     break;
                 case 'checking':
-                    statusHtml = '<i class="fa fa-circle text-warning" title="检测中"></i>' +
+                    statusHtml = '<i class="fa fa-circle text-warning" title="' + i18n.get('connection.detecting') + '"></i>' +
                         '<span class="badge badge-warning">' + i18n.get('status.checking') + '</span>';
                     break;
                 default:
-                    statusHtml = '<i class="fa fa-circle text-muted" title="未检测"></i>' +
-                        '<span class="badge badge-secondary">待检测</span>';
+                    statusHtml = '<i class="fa fa-circle text-muted" title="' + i18n.get('connection.not.detected') + '"></i>' +
+                        '<span class="badge badge-secondary">' + i18n.get('connection.not.detected') + '</span>';
             }
             
             jqIndicators.html(statusHtml);
@@ -1055,9 +1055,9 @@
             
             // 模块状态
             if (statusData.moduleActive) {
-                statusHtml += '<span class="badge badge-success">' + i18n.get('status.active') + '</span>';
+                statusHtml += '<span class="badge badge-success">' + i18n.get('connection.module.active') + '</span>';
             } else {
-                statusHtml += '<span class="badge badge-danger">' + i18n.get('status.inactive') + '</span>';
+                statusHtml += '<span class="badge badge-danger">' + i18n.get('connection.module.inactive') + '</span>';
             }
             
             // 响应时间
@@ -1138,8 +1138,8 @@
                         updateHeartbeatTime(row, response.data.lastHeartbeat);
                         
                         // 记录检测结果
-                        var status = response.data.online ? '在线' : '离线';
-                        var moduleStatus = response.data.moduleActive ? '运行中' : '异常';
+                        var status = response.data.online ? i18n.get('connection.online') : i18n.get('connection.offline');
+                        var moduleStatus = response.data.moduleActive ? i18n.get('connection.module.active') : i18n.get('connection.module.inactive');
                         console.log('[OK] ' + appName + '@' + ip + ': ' + status + ', ' + moduleStatus + ', ' + response.data.responseTime + 'ms');
                     } else {
                         updateModuleStatusOffline(row, response.message);
@@ -1147,14 +1147,14 @@
                     }
                 })
                 .fail(function(xhr, status, error) {
-                    updateModuleStatusOffline(row, '网络错误: ' + error);
+                    updateModuleStatusOffline(row, i18n.get('network.error') + ': ' + error);
                     console.log('[NET] ' + appName + '@' + ip + ': 网络异常 - ' + error);
                 });
         }
         
         function updateModuleStatusOffline(row, error) {
-            var statusHtml = '<i class="fa fa-circle text-danger" title="连接失败: ' + error + '"></i>' +
-                '<span class="badge badge-danger">' + i18n.get('status.offline') + '</span>';
+            var statusHtml = '<i class="fa fa-circle text-danger" title="' + i18n.get('connection.failed') + ': ' + error + '"></i>' +
+                '<span class="badge badge-danger">' + i18n.get('connection.offline') + '</span>';
             row.find('.status-indicators').html(statusHtml);
         }
         
@@ -1168,7 +1168,7 @@
         // 手动刷新所有状态
         function refreshAllStatus() {
             checkAllModuleStatus();
-            notice('正在刷新所有模块状态...', true);
+            notice(i18n.get('monitor.refreshing.all'), true);
         }
         
         // 切换监控开关
@@ -1203,16 +1203,16 @@
             if (enabled) {
                 jqBtn.removeClass('btn-secondary').addClass('btn-success');
                 jqIcon.removeClass('fa-play').addClass('fa-pause');
-                jqText.text('监控中');
-                jqBtn.attr('title', '点击暂停自动状态监控');
+                jqText.text(i18n.get('monitor.status.monitoring'));
+                jqBtn.attr('title', i18n.get('monitor.click.pause'));
             } else {
                 jqBtn.removeClass('btn-success').addClass('btn-secondary');
                 jqIcon.removeClass('fa-pause').addClass('fa-play');
-                jqText.text('已暂停');
-                jqBtn.attr('title', '点击启动自动状态监控');
+                jqText.text(i18n.get('monitor.status.paused'));
+                jqBtn.attr('title', i18n.get('monitor.click.start'));
             }
             
-            notice(enabled ? '状态监控已启动' : '状态监控已暂停', true);
+            notice(enabled ? i18n.get('notify.status.monitor.started') : i18n.get('notify.status.monitor.paused'), true);
         };
         
         // 刷新状态按钮控制函数  
@@ -1230,7 +1230,7 @@
             setTimeout(function() {
                 jqBtn.prop('disabled', false);
                 jqIcon.removeClass('fa-spin');
-                notice('模块状态已刷新', true);
+                notice(i18n.get('monitor.status.refreshed'), true);
             }, 2000);
         };
         

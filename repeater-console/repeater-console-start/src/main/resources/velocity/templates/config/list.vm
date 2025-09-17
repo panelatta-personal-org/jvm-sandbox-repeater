@@ -39,35 +39,35 @@
                     <div id="config-debug-panel" class="card card-warning collapsed-card" style="display:none;">
                         <div class="card-header">
                             <h3 class="card-title">
-                                <i class="fa fa-bug"></i> Config推送调试面板
+                                <i class="fa fa-bug"></i> $i18n.get("debug.panel.title")
                             </h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-warning btn-sm" data-card-widget="collapse">
                                     <i class="fa fa-plus"></i>
                                 </button>
                                 <button type="button" class="btn btn-warning btn-sm" onclick="clearDebugLog()">
-                                    <i class="fa fa-trash"></i> 清空
+                                    <i class="fa fa-trash"></i> $i18n.get("debug.panel.clear")
                                 </button>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h5>📋 推送参数</h5>
+                                    <h5>📋 $i18n.get("debug.panel.push.params")</h5>
                                     <div id="push-params-display" class="debug-content">
-                                        <p class="text-muted">点击推送按钮时显示参数</p>
+                                        <p class="text-muted">$i18n.get("debug.panel.push.params.hint")</p>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <h5>📋 模块匹配结果</h5>
+                                    <h5>📋 $i18n.get("debug.panel.module.match")</h5>
                                     <div id="module-match-display" class="debug-content">
-                                        <p class="text-muted">显示匹配的模块列表</p>
+                                        <p class="text-muted">$i18n.get("debug.panel.module.match.hint")</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col-md-12">
-                                    <h5>📝 调试日志</h5>
+                                    <h5>📝 $i18n.get("debug.panel.debug.log")</h5>
                                     <div id="debug-log-display" class="debug-log">
                                         <!-- 实时调试日志 -->
                                     </div>
@@ -88,13 +88,13 @@
                             <div class="card-tools">
                             <div class="btn-group float-right" role="group" style="margin-right: 10px;">
                                 <button type="button" class="btn btn-info btn-sm" onclick="openEnvironmentChecker()">
-                                    <i class="fa fa-check-circle"></i> Environment检查器
+                                    <i class="fa fa-check-circle"></i> $i18n.get("env.checker.title")
                                 </button>
                                 <button type="button" class="btn btn-warning btn-sm" onclick="toggleConfigDebugPanel()">
-                                    <i class="fa fa-bug"></i> 调试面板
+                                    <i class="fa fa-bug"></i> $i18n.get("debug.panel.title")
                                 </button>
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="openDatabaseDebugger()">
-                                    <i class="fa fa-database"></i> 数据库调试
+                                    <i class="fa fa-database"></i> $i18n.get("db.debugger.title")
                                 </button>
                             </div>
                                 <a href="/config/add.htm" target="_blank" class="btn btn-primary btn-sm float-right"
@@ -226,17 +226,17 @@
             };
             
             var html = '<div class="param-item">' +
-                '<strong>应用名:</strong> <span class="text-primary">' + appName + '</span><br>' +
-                '<strong>环境:</strong> <span class="text-info">' + environment + '</span><br>' +
-                '<strong>时间:</strong> <span class="text-muted">' + params.timestamp + '</span>' +
+                '<strong>' + i18n.get('common.app.name') + ':</strong> <span class="text-primary">' + appName + '</span><br>' +
+                '<strong>' + i18n.get('common.environment') + ':</strong> <span class="text-info">' + environment + '</span><br>' +
+                '<strong>' + i18n.get('common.time') + ':</strong> <span class="text-muted">' + params.timestamp + '</span>' +
                 '</div>';
             
             jq('#push-params-display').html(html);
-            addDebugLog('[PUSH]', '开始推送Config - AppName: ' + appName + ', Environment: ' + environment);
+            addDebugLog('[PUSH]', i18n.get('push.start') + ' - AppName: ' + appName + ', Environment: ' + environment);
         }
         
         function checkModuleMatches(appName, environment, callback) {
-            addDebugLog('[QUERY]', '正在查询匹配的模块...');
+            addDebugLog('[QUERY]', i18n.get('push.querying.modules'));
             
             jq.ajax({
                 url: '/config/checkMatches.json',
@@ -259,7 +259,7 @@
                     callback({
                         hasMatches: false,
                         reason: 'network_error',
-                        suggestions: ['检查网络连接', '重试操作'],
+                        suggestions: [i18n.get('suggestion.check.network'), i18n.get('suggestion.retry')],
                         matchCount: 0,
                         availableEnvironments: []
                     });
@@ -271,12 +271,12 @@
             var html = '';
             if (matchResult.hasMatches) {
                 html = '<div class="alert alert-success">' +
-                    '<strong>[OK] 找到 ' + matchResult.matchCount + ' 个匹配的模块</strong>' +
+                    '<strong>[OK] ' + i18n.get('push.found.modules', matchResult.matchCount) + '</strong>' +
                     '</div>' +
                     '<div class="mt-2">' +
-                    '<small class="text-muted">匹配的模块将接收Config推送</small>' +
+                    '<small class="text-muted">' + i18n.get('push.modules.will.receive') + '</small>' +
                     '</div>';
-                addDebugLog('[OK]', '找到 ' + matchResult.matchCount + ' 个匹配的模块');
+                addDebugLog('[OK]', i18n.get('push.found.modules', matchResult.matchCount));
             } else {
                 var envBadges = '';
                 for (var i = 0; i < matchResult.availableEnvironments.length; i++) {
@@ -284,14 +284,14 @@
                 }
                 
                 html = '<div class="alert alert-danger">' +
-                    '<strong>[ERROR] 没有找到匹配的模块</strong>' +
+                    '<strong>[ERROR] ' + i18n.get('push.no.modules') + '</strong>' +
                     '</div>' +
                     '<div class="mt-2">' +
-                    '<strong>原因:</strong> <span class="text-danger">' + getReasonText(matchResult.reason) + '</span><br>' +
-                    '<strong>可用的Environments:</strong><br>' +
+                    '<strong>' + i18n.get('push.reason') + ':</strong> <span class="text-danger">' + getReasonText(matchResult.reason) + '</span><br>' +
+                    '<strong>' + i18n.get('env.checker.available.envs') + ':</strong><br>' +
                     envBadges +
                     '</div>';
-                addDebugLog('[ERROR]', '没有找到匹配的模块 - ' + getReasonText(matchResult.reason));
+                addDebugLog('[ERROR]', i18n.get('push.no.modules') + ' - ' + getReasonText(matchResult.reason));
             }
             
             jq('#module-match-display').html(html);
@@ -299,16 +299,16 @@
         
         function getReasonText(reason) {
             switch(reason) {
-                case 'no_modules': return '该应用没有注册任何模块';
-                case 'environment_mismatch': return 'Environment不匹配';
-                case 'api_error': return 'API调用错误';
-                case 'network_error': return '网络连接错误';
-                default: return '未知原因';
+                case 'no_modules': return i18n.get('reason.no.modules');
+                case 'environment_mismatch': return i18n.get('reason.env.mismatch');
+                case 'api_error': return i18n.get('reason.api.error');
+                case 'network_error': return i18n.get('reason.network.error');
+                default: return i18n.get('reason.unknown');
             }
         }
         
         function executePushConfig(appName, environment) {
-            addDebugLog('[START]', '开始执行Config推送...');
+            addDebugLog('[START]', i18n.get('push.start') + '...');
             showLoading(10);
             
             jq.ajax({
@@ -321,16 +321,16 @@
                 success: function (res) {
                     hideLoading(10);
                     if (res.success) {
-                        addDebugLog('[SUCCESS]', 'Config推送成功: ' + res.message);
+                        addDebugLog('[SUCCESS]', i18n.get('push.success') + ': ' + res.message);
                     } else {
-                        addDebugLog('[FAIL]', 'Config推送失败: ' + res.message);
+                        addDebugLog('[FAIL]', i18n.get('push.failed') + ': ' + res.message);
                     }
                     notice(res.message, res.success);
                 },
                 dataType: 'json',
                 error: function (XMLHttpRequest) {
                     hideLoading(10);
-                    addDebugLog('[EXCEPTION]', 'Config推送异常: ' + XMLHttpRequest.responseText);
+                    addDebugLog('[EXCEPTION]', i18n.get('push.exception') + ': ' + XMLHttpRequest.responseText);
                     notice(JSON.stringify(XMLHttpRequest), false);
                 }
             });
@@ -343,9 +343,9 @@
             }
             
             var alertHtml = '<div class="alert alert-warning">' +
-                '<h5><i class="fa fa-exclamation-triangle"></i> 无法推送Config</h5>' +
-                '<p><strong>原因:</strong> ' + getReasonText(reason) + '</p>' +
-                '<p><strong>建议:</strong></p>' +
+                '<h5><i class="fa fa-exclamation-triangle"></i> ' + i18n.get('push.cannot') + '</h5>' +
+                '<p><strong>' + i18n.get('push.reason') + ':</strong> ' + getReasonText(reason) + '</p>' +
+                '<p><strong>' + i18n.get('push.suggestion') + ':</strong></p>' +
                 '<ul>' + suggestionHtml + '</ul>' +
                 '</div>';
             
@@ -368,8 +368,8 @@
         
         window.clearDebugLog = function() {
             jq('#debug-log-display').empty();
-            jq('#push-params-display').html('<p class=\"text-muted\">点击推送按钮时显示参数</p>');
-            jq('#module-match-display').html('<p class=\"text-muted\">显示匹配的模块列表</p>');
+            jq('#push-params-display').html('<p class=\"text-muted\">' + i18n.get('debug.panel.push.params.hint') + '</p>');
+            jq('#module-match-display').html('<p class=\"text-muted\">' + i18n.get('debug.panel.module.match.hint') + '</p>');
         };
         
         // ==================== 方案2：Environment一致性检查器函数 ====================
@@ -383,20 +383,20 @@
         };
         
         window.autoFixEnvironments = function() {
-            if (confirm('确定要自动修复Environment不匹配的问题吗？这将修改Config表中的environment字段。')) {
+            if (confirm(i18n.get('confirm.auto.fix.env'))) {
                 jq.ajax({
                     url: '/config/autoFixEnvironments.json',
                     method: 'POST',
                     success: function(response) {
                         if (response.success) {
-                            notice('自动修复完成: ' + response.message, true);
+                            notice(i18n.get('notify.auto.fix.completed') + ': ' + response.message, true);
                             runEnvironmentCheck(); // 重新检查
                         } else {
-                            notice('自动修复失败: ' + response.message, false);
+                            notice(i18n.get('notify.auto.fix.failed') + ': ' + response.message, false);
                         }
                     },
                     error: function() {
-                        notice('自动修复请求失败', false);
+                        notice(i18n.get('notify.auto.fix.request.failed'), false);
                     }
                 });
             }
@@ -412,7 +412,7 @@
                         loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('operation.deleting');
                         break;
                     default:
-                        loadingText = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+                        loadingText = '<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('operation.processing');
                 }
                 
                 jqBtn.prop('disabled', true)
@@ -492,7 +492,7 @@
                 '<div class="modal-dialog modal-xl">' +
                 '<div class="modal-content">' +
                 '<div class="modal-header">' +
-                '<h4 class="modal-title"><i class="fa fa-database"></i> 数据库调试器</h4>' +
+                '<h4 class="modal-title"><i class="fa fa-database"></i> ' + i18n.get('db.debugger.title') + '</h4>' +
                 '<button type="button" class="close" data-dismiss="modal">' +
                 '<span aria-hidden="true">×</span>' +
                 '</button>' +
@@ -500,40 +500,40 @@
                 '<div class="modal-body">' +
                 '<div class="row">' +
                 '<div class="col-md-6">' +
-                '<h5><i class="fa fa-cog"></i> Config数据</h5>' +
-                '<button class="btn btn-primary btn-sm" onclick="queryAllConfigs()">查询所有Config</button>' +
+                '<h5><i class="fa fa-cog"></i> ' + i18n.get('db.debugger.config.data') + '</h5>' +
+                '<button class="btn btn-primary btn-sm" onclick="queryAllConfigs()">' + i18n.get('db.debugger.query.all.configs') + '</button>' +
                 '<div id="config-data-display" class="mt-3">' +
-                '<p class="text-muted">点击上方按钮查询Config数据</p>' +
+                '<p class="text-muted">' + i18n.get('db.debugger.query.hint.config') + '</p>' +
                 '</div>' +
                 '</div>' +
                 '<div class="col-md-6">' +
-                '<h5><i class="fa fa-server"></i> Module数据</h5>' +
-                '<button class="btn btn-info btn-sm" onclick="queryAllModules()">查询所有Module</button>' +
+                '<h5><i class="fa fa-server"></i> ' + i18n.get('db.debugger.module.data') + '</h5>' +
+                '<button class="btn btn-info btn-sm" onclick="queryAllModules()">' + i18n.get('db.debugger.query.all.modules') + '</button>' +
                 '<div id="module-data-display" class="mt-3">' +
-                '<p class="text-muted">点击上方按钮查询Module数据</p>' +
+                '<p class="text-muted">' + i18n.get('db.debugger.query.hint.module') + '</p>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
                 '<div class="row mt-4">' +
                 '<div class="col-12">' +
-                '<h5><i class="fa fa-search"></i> 匹配分析</h5>' +
+                '<h5><i class="fa fa-search"></i> ' + i18n.get('db.debugger.matching.analysis') + '</h5>' +
                 '<div class="form-group">' +
-                '<label>应用名称:</label>' +
-                '<input type="text" id="debug-app-name" class="form-control" placeholder="输入应用名称">' +
+                '<label>' + i18n.get('db.debugger.app.name') + ':</label>' +
+                '<input type="text" id="debug-app-name" class="form-control" placeholder="' + i18n.get('db.debugger.app.name.placeholder') + '">' +
                 '</div>' +
                 '<div class="form-group">' +
-                '<label>环境:</label>' +
-                '<input type="text" id="debug-environment" class="form-control" placeholder="输入环境名称">' +
+                '<label>' + i18n.get('db.debugger.env.name') + ':</label>' +
+                '<input type="text" id="debug-environment" class="form-control" placeholder="' + i18n.get('db.debugger.env.placeholder') + '">' +
                 '</div>' +
-                '<button class="btn btn-warning" onclick="analyzeMatching()">分析匹配情况</button>' +
+                '<button class="btn btn-warning" onclick="analyzeMatching()">' + i18n.get('db.debugger.analyze.matching') + '</button>' +
                 '<div id="matching-analysis-display" class="mt-3">' +
-                '<p class="text-muted">填写应用名称和环境后点击分析</p>' +
+                '<p class="text-muted">' + i18n.get('db.debugger.fill.hint') + '</p>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
                 '<div class="modal-footer">' +
-                '<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>' +
+                '<button type="button" class="btn btn-secondary" data-dismiss="modal">' + i18n.get('env.checker.close') + '</button>' +
                 '</div>' +
                 '</div>' +
                 '</div>' +
@@ -542,7 +542,7 @@
         }
         
         window.queryAllConfigs = function() {
-            jq('#config-data-display').html('<i class="fa fa-spinner fa-spin"></i> 查询中...');
+            jq('#config-data-display').html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('db.debugger.querying'));
             jq.ajax({
                 url: '/config/debugQuery.json',
                 method: 'GET',
@@ -550,17 +550,17 @@
                     if (response.success && response.data) {
                         displayConfigData(response.data);
                     } else {
-                        jq('#config-data-display').html('<p class="text-danger">查询失败: ' + (response.message || '未知错误') + '</p>');
+                        jq('#config-data-display').html('<p class="text-danger">' + i18n.get('db.debugger.query.failed') + ': ' + (response.message || i18n.get('db.debugger.unknown.error')) + '</p>');
                     }
                 },
                 error: function() {
-                    jq('#config-data-display').html('<p class="text-danger">查询请求失败</p>');
+                    jq('#config-data-display').html('<p class="text-danger">' + i18n.get('db.debugger.request.failed') + '</p>');
                 }
             });
         };
         
         window.queryAllModules = function() {
-            jq('#module-data-display').html('<i class="fa fa-spinner fa-spin"></i> 查询中...');
+            jq('#module-data-display').html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('db.debugger.querying'));
             jq.ajax({
                 url: '/module/debugQuery.json',
                 method: 'GET',
@@ -568,11 +568,11 @@
                     if (response.success && response.data) {
                         displayModuleData(response.data);
                     } else {
-                        jq('#module-data-display').html('<p class="text-danger">查询失败: ' + (response.message || '未知错误') + '</p>');
+                        jq('#module-data-display').html('<p class="text-danger">' + i18n.get('db.debugger.query.failed') + ': ' + (response.message || i18n.get('db.debugger.unknown.error')) + '</p>');
                     }
                 },
                 error: function() {
-                    jq('#module-data-display').html('<p class="text-danger">查询请求失败</p>');
+                    jq('#module-data-display').html('<p class="text-danger">' + i18n.get('db.debugger.request.failed') + '</p>');
                 }
             });
         };
@@ -582,11 +582,11 @@
             var environment = jq('#debug-environment').val().trim();
             
             if (!appName || !environment) {
-                jq('#matching-analysis-display').html('<p class="text-warning">请填写应用名称和环境</p>');
+                jq('#matching-analysis-display').html('<p class="text-warning">' + i18n.get('db.debugger.fill.required') + '</p>');
                 return;
             }
             
-            jq('#matching-analysis-display').html('<i class="fa fa-spinner fa-spin"></i> 分析中...');
+            jq('#matching-analysis-display').html('<i class="fa fa-spinner fa-spin"></i> ' + i18n.get('db.debugger.analyzing'));
             jq.ajax({
                 url: '/config/debugMatching.json',
                 method: 'GET',
@@ -595,23 +595,23 @@
                     if (response.success && response.data) {
                         displayMatchingAnalysis(response.data);
                     } else {
-                        jq('#matching-analysis-display').html('<p class="text-danger">分析失败: ' + (response.message || '未知错误') + '</p>');
+                        jq('#matching-analysis-display').html('<p class="text-danger">' + i18n.get('db.debugger.analysis.failed') + ': ' + (response.message || i18n.get('db.debugger.unknown.error')) + '</p>');
                     }
                 },
                 error: function() {
-                    jq('#matching-analysis-display').html('<p class="text-danger">分析请求失败</p>');
+                    jq('#matching-analysis-display').html('<p class="text-danger">' + i18n.get('db.debugger.analysis.request.failed') + '</p>');
                 }
             });
         };
         
         function displayConfigData(configs) {
             if (!configs || configs.length === 0) {
-                jq('#config-data-display').html('<p class="text-warning">没有找到Config数据</p>');
+                jq('#config-data-display').html('<p class="text-warning">' + i18n.get('db.debugger.no.config.data') + '</p>');
                 return;
             }
             
             var html = '<table class="table table-sm table-striped">' +
-                '<thead><tr><th>应用名</th><th>环境</th><th>创建时间</th></tr></thead>' +
+                '<thead><tr><th>' + i18n.get('common.app.name') + '</th><th>' + i18n.get('common.environment') + '</th><th>' + i18n.get('common.create.time') + '</th></tr></thead>' +
                 '<tbody>';
             configs.forEach(function(config) {
                 html += '<tr>' +
@@ -626,12 +626,12 @@
         
         function displayModuleData(modules) {
             if (!modules || modules.length === 0) {
-                jq('#module-data-display').html('<p class="text-warning">没有找到Module数据</p>');
+                jq('#module-data-display').html('<p class="text-warning">' + i18n.get('db.debugger.no.module.data') + '</p>');
                 return;
             }
             
             var html = '<table class="table table-sm table-striped">' +
-                '<thead><tr><th>应用名</th><th>环境</th><th>IP</th><th>状态</th><th>心跳时间</th></tr></thead>' +
+                '<thead><tr><th>' + i18n.get('common.app.name') + '</th><th>' + i18n.get('common.environment') + '</th><th>IP</th><th>' + i18n.get('label.status') + '</th><th>' + i18n.get('common.heartbeat.time') + '</th></tr></thead>' +
                 '<tbody>';
             modules.forEach(function(module) {
                 html += '<tr>' +
@@ -648,12 +648,12 @@
         
         function displayMatchingAnalysis(analysis) {
             var html = '<div class="alert alert-info">' +
-                '<h6><i class="fa fa-info-circle"></i> 匹配分析结果</h6>' +
-                '<p><strong>匹配的Module数量:</strong> ' + (analysis.moduleCount || 0) + '</p>' +
-                '<p><strong>匹配的Config数量:</strong> ' + (analysis.configCount || 0) + '</p>';
+                '<h6><i class="fa fa-info-circle"></i> ' + i18n.get('db.debugger.analysis.result') + '</h6>' +
+                '<p><strong>' + i18n.get('db.debugger.module.count') + ':</strong> ' + (analysis.moduleCount || 0) + '</p>' +
+                '<p><strong>' + i18n.get('db.debugger.config.count') + ':</strong> ' + (analysis.configCount || 0) + '</p>';
             
             if (analysis.issues && analysis.issues.length > 0) {
-                html += '<p><strong>发现的问题:</strong></p><ul>';
+                html += '<p><strong>' + i18n.get('db.debugger.issues.found') + ':</strong></p><ul>';
                 analysis.issues.forEach(function(issue) {
                     html += '<li class="text-danger">' + issue + '</li>';
                 });
@@ -661,7 +661,7 @@
             }
             
             if (analysis.suggestions && analysis.suggestions.length > 0) {
-                html += '<p><strong>建议:</strong></p><ul>';
+                html += '<p><strong>' + i18n.get('push.suggestion') + ':</strong></p><ul>';
                 analysis.suggestions.forEach(function(suggestion) {
                     html += '<li class="text-success">' + suggestion + '</li>';
                 });
@@ -671,8 +671,8 @@
             html += '</div>';
             
             if (analysis.modules && analysis.modules.length > 0) {
-                html += '<h6>匹配的Module:</h6>';
-                html += '<table class="table table-sm"><thead><tr><th>应用名</th><th>环境</th><th>IP</th></tr></thead><tbody>';
+                html += '<h6>' + i18n.get('db.debugger.matched.modules') + ':</h6>';
+                html += '<table class="table table-sm"><thead><tr><th>' + i18n.get('common.app.name') + '</th><th>' + i18n.get('common.environment') + '</th><th>IP</th></tr></thead><tbody>';
                 analysis.modules.forEach(function(module) {
                     html += '<tr><td>' + module.appName + '</td><td>' + module.environment + '</td><td>' + module.ip + '</td></tr>';
                 });
@@ -752,7 +752,7 @@
             '<div class="modal-content">' +
             '<div class="modal-header bg-info">' +
             '<h4 class="modal-title">' +
-            '<i class="fa fa-check-circle"></i> Environment一致性检查器' +
+            '<i class="fa fa-check-circle"></i> ' + i18n.get('env.checker.title') +
             '</h4>' +
             '<button type="button" class="close" data-dismiss="modal">' +
             '<span>×</span>' +
@@ -765,12 +765,12 @@
             '</div>' +
             '<div class="modal-footer">' +
             '<button type="button" class="btn btn-primary" onclick="runEnvironmentCheck()">' +
-            '<i class="fa fa-refresh"></i> 重新检查' +
+            '<i class="fa fa-refresh"></i> ' + i18n.get('env.checker.recheck') +
             '</button>' +
             '<button type="button" class="btn btn-success" onclick="autoFixEnvironments()" id="auto-fix-btn" style="display:none;">' +
-            '<i class="fa fa-magic"></i> 自动修复' +
+            '<i class="fa fa-magic"></i> ' + i18n.get('env.checker.auto.fix') +
             '</button>' +
-            '<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>' +
+            '<button type="button" class="btn btn-secondary" data-dismiss="modal">' + i18n.get('env.checker.close') + '</button>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -780,7 +780,7 @@
     
     function runEnvironmentCheck() {
         var jqcontent = jq('#environment-check-content');
-        jqcontent.html('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> 正在检查...</div>');
+        jqcontent.html('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> ' + i18n.get('env.checker.checking') + '</div>');
         
         jq.ajax({
             url: '/config/checkEnvironments.json',
@@ -789,11 +789,11 @@
                 if (response.success) {
                     displayEnvironmentCheckResult(response.data);
                 } else {
-                    jqcontent.html('<div class=\"alert alert-danger\">检查失败: ' + response.message + '</div>');
+                    jqcontent.html('<div class=\"alert alert-danger\">' + i18n.get('env.checker.failed') + ': ' + response.message + '</div>');
                 }
             },
             error: function() {
-                jqcontent.html('<div class=\"alert alert-danger\">检查失败，请重试</div>');
+                jqcontent.html('<div class=\"alert alert-danger\">' + i18n.get('env.checker.retry') + '</div>');
             }
         });
     }
@@ -804,29 +804,29 @@
         // 总体状态
         if (data.hasIssues) {
             html += '<div class="alert alert-warning">' +
-                '<h5><i class="fa fa-exclamation-triangle"></i> 发现Environment不匹配问题</h5>' +
-                '<p>发现 ' + data.issueCount + ' 个不匹配的Config配置</p>' +
+                '<h5><i class="fa fa-exclamation-triangle"></i> ' + i18n.get('env.checker.issues.found') + '</h5>' +
+                '<p>' + i18n.get('env.checker.issues.count', data.issueCount) + '</p>' +
                 '</div>';
             jq('#auto-fix-btn').show();
         } else {
             html += '<div class="alert alert-success">' +
-                '<h5><i class="fa fa-check"></i> Environment配置正常</h5>' +
-                '<p>所有Config的Environment都有对应的模块</p>' +
+                '<h5><i class="fa fa-check"></i> ' + i18n.get('env.checker.normal') + '</h5>' +
+                '<p>' + i18n.get('env.checker.all.matched') + '</p>' +
                 '</div>';
             jq('#auto-fix-btn').hide();
         }
         
         // 详细的匹配表
         if (data.details && data.details.length > 0) {
-            html += '<h5>📋 详细匹配情况</h5>';
+            html += '<h5>📋 ' + i18n.get('env.checker.details') + '</h5>';
             html += '<table class="table table-sm table-striped">' +
                 '<thead>' +
                 '<tr>' +
                 '<th>Config (AppName)</th>' +
                 '<th>Config Environment</th>' +
-                '<th>匹配状态</th>' +
-                '<th>可用的Module Environments</th>' +
-                '<th>建议</th>' +
+                '<th>' + i18n.get('env.checker.match.status') + '</th>' +
+                '<th>' + i18n.get('env.checker.available.envs') + '</th>' +
+                '<th>' + i18n.get('push.suggestion') + '</th>' +
                 '</tr>' +
                 '</thead>' +
                 '<tbody>';
@@ -834,7 +834,7 @@
             data.details.forEach(function(item) {
                 var statusClass = item.matched ? 'text-success' : 'text-danger';
                 var statusIcon = item.matched ? 'fa-check' : 'fa-times';
-                var statusText = item.matched ? '匹配' : '不匹配';
+                var statusText = item.matched ? i18n.get('env.checker.matched') : i18n.get('env.checker.not.matched');
                 
                 var envBadges = '';
                 for (var i = 0; i < item.availableEnvironments.length; i++) {

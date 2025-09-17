@@ -503,7 +503,7 @@
             modal.find('#startInstallForm')[0].reset();
             // 重新设置默认值
             modal.find("input[name='port']").val('12580');
-            modal.find("select[name='environment']").val('default');
+            modal.find("input[name='environment']").val('default');
             
             // 显示模态框
             modal.modal('show');
@@ -527,7 +527,7 @@
             var appName = modal.find("input[name='appName']").val();
             var ip = modal.find("input[name='ip']").val();
             var port = modal.find("input[name='port']").val();
-            var environment = modal.find("select[name='environment']").val();
+            var environment = modal.find("input[name='environment']").val();
             
             // 清理输入值
             appName = appName ? appName.trim() : '';
@@ -663,7 +663,7 @@
             var appName = modal.find("input[name='appName']").val();
             var ip = modal.find("input[name='ip']").val();
             var port = modal.find("input[name='port']").val();
-            var environment = modal.find("select[name='environment']").val();
+            var environment = modal.find("input[name='environment']").val();
             
             console.log('=== 模块注册表单调试信息 ===');
             console.log('模态框是否可见:', modal.is(':visible'));
@@ -704,7 +704,7 @@
             modal.find("input[name='appName']").val(testData.appName);
             modal.find("input[name='ip']").val(testData.ip);
             modal.find("input[name='port']").val(testData.port);
-            modal.find("select[name='environment']").val(testData.environment || 'default');
+            modal.find("input[name='environment']").val(testData.environment || 'default');
             
             console.log('表单已填充，可以手动点击注册按钮测试');
             

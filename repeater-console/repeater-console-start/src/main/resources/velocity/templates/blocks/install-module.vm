@@ -36,13 +36,9 @@
                         <div class="form-group" id="machine-select-group" style="width: 100%;">
                             <label for="environment" class="col-3 control-label">$i18n.get("form.environment.label")</label>
                             <div class="col-8">
-                                <select class="form-control form-control-sm" name="environment" style="width: 300px">
-                                    <option value="default">$i18n.get("environment.default")</option>
-                                    <option value="dev">$i18n.get("environment.dev")</option>
-                                    <option value="test">$i18n.get("environment.test")</option>
-                                    <option value="staging">$i18n.get("environment.staging")</option>
-                                    <option value="prod">$i18n.get("environment.prod")</option>
-                                </select>
+                                <input type="text" class="form-control form-control-sm" name="environment" 
+                                       autocomplete="off" placeholder="$i18n.get('form.environment.placeholder')" 
+                                       value="default" style="width: 300px">
                                 <small class="form-text text-muted">$i18n.get("form.environment.help")</small>
                             </div>
                         </div>

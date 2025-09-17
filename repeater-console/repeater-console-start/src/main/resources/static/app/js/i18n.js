@@ -173,7 +173,7 @@ var i18n = {
             }
         }
         
-        $('#current-language').text(displayName);
+        this.$('#current-language').text(displayName);
     },
     
     /**
@@ -246,6 +246,12 @@ var i18n = {
 };
 
 // 页面加载完成后初始化
-$(document).ready(function() {
+// 使用原生事件避免jQuery依赖问题
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        i18n.init();
+    });
+} else {
+    // 如果DOM已加载完成，直接初始化
     i18n.init();
-});
+}

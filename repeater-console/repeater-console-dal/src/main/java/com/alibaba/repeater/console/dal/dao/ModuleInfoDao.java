@@ -65,4 +65,8 @@ public class ModuleInfoDao {
     public ModuleInfo findByAppNameAndIp(String appName, String ip) {
         return moduleInfoRepository.findByAppNameAndIp(appName, ip);
     }
+
+    public void delete(ModuleInfo moduleInfo) {
+        moduleInfoRepository.delete(moduleInfo);
+    }
 }

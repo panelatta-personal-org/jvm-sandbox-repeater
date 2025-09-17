@@ -202,6 +202,34 @@
         })
 
         $("#start-install-btn").on('click', function () {
+            // 添加表单验证
+            var appName = $("input[name='appName']").val().trim();
+            var ip = $("input[name='ip']").val().trim();
+            var port = $("input[name='port']").val().trim();
+            
+            if (!appName) {
+                alert(i18n.get('js.error.appname.required'));
+                return;
+            }
+            
+            if (!ip) {
+                alert(i18n.get('js.error.ip.required'));
+                return;
+            }
+            
+            // 验证IP格式
+            var ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+            if (!ipRegex.test(ip)) {
+                alert(i18n.get('js.error.ip.format'));
+                return;
+            }
+            
+            // 验证端口
+            if (port && (isNaN(port) || port < 1 || port > 65535)) {
+                alert(i18n.get('js.error.port.range'));
+                return;
+            }
+            
             showLoading(10);
             $("#startInstallForm").ajaxSubmit({
                 type: "post",

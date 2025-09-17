@@ -30,4 +30,6 @@ public interface ModuleInfoService {
     RepeaterResult<String> install(ModuleInfoParams params);
 
     RepeaterResult<String> reload(ModuleInfoParams params);
+
+    RepeaterResult<String> remove(ModuleInfoParams params);
 }

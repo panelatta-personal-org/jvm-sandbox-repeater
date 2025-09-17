@@ -73,4 +73,10 @@ public class ModuleInfoController {
     public RepeaterResult<String> reload(@ModelAttribute("requestParams") ModuleInfoParams params) {
         return moduleInfoService.reload(params);
     }
+
+    @ResponseBody
+    @RequestMapping("/remove.json")
+    public RepeaterResult<String> remove(@ModelAttribute("requestParams") ModuleInfoParams params) {
+        return moduleInfoService.remove(params);
+    }
 }

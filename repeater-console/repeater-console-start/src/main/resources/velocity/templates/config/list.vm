@@ -187,10 +187,12 @@
 #parse("blocks/fakeloader.vm")
 
 <script type="application/javascript">
-    jQuery(function ($) {
-        $(".btn-push").on('click', function () {
-            var appName = $(this).attr('data-app');
-            var environment = $(this).attr('data-env');
+    // 避免与Velocity的$符号冲突
+    var jq = jQuery.noConflict();
+    jq(function () {
+        jq(".btn-push").on('click', function () {
+            var appName = jq(this).attr('data-app');
+            var environment = jq(this).attr('data-env');
             
             // 显示调试面板并记录推送参数
             showConfigDebugPanel();
@@ -213,21 +215,21 @@
         // ==================== 方案1：Config推送调试面板函数 ====================
         
         window.toggleConfigDebugPanel = function() {
-            var $panel = $('#config-debug-panel');
-            if ($panel.is(':visible')) {
-                $panel.hide();
+            var jqpanel = jq('#config-debug-panel');
+            if (jqpanel.is(':visible')) {
+                jqpanel.hide();
             } else {
-                $panel.show();
-                if ($panel.hasClass('collapsed-card')) {
-                    $panel.find('[data-card-widget="collapse"]').click();
+                jqpanel.show();
+                if (jqpanel.hasClass('collapsed-card')) {
+                    jqpanel.find('[data-card-widget="collapse"]').click();
                 }
             }
         };
         
         function showConfigDebugPanel() {
-            $('#config-debug-panel').show();
-            if ($('#config-debug-panel').hasClass('collapsed-card')) {
-                $('#config-debug-panel').find('[data-card-widget="collapse"]').click();
+            jq('#config-debug-panel').show();
+            if (jq('#config-debug-panel').hasClass('collapsed-card')) {
+                jq('#config-debug-panel').find('[data-card-widget="collapse"]').click();
             }
         }
         
@@ -244,14 +246,14 @@
                 '<strong>时间:</strong> <span class="text-muted">' + params.timestamp + '</span>' +
                 '</div>';
             
-            $('#push-params-display').html(html);
+            jq('#push-params-display').html(html);
             addDebugLog('[PUSH]', '开始推送Config - AppName: ' + appName + ', Environment: ' + environment);
         }
         
         function checkModuleMatches(appName, environment, callback) {
             addDebugLog('[QUERY]', '正在查询匹配的模块...');
             
-            $.ajax({
+            jq.ajax({
                 url: '/config/checkMatches.json',
                 method: 'GET',
                 data: { appName: appName, environment: environment },
@@ -307,7 +309,7 @@
                 addDebugLog('[ERROR]', '没有找到匹配的模块 - ' + getReasonText(matchResult.reason));
             }
             
-            $('#module-match-display').html(html);
+            jq('#module-match-display').html(html);
         }
         
         function getReasonText(reason) {
@@ -321,10 +323,10 @@
         }
         
         function executePushConfig(appName, environment) {
-            addDebugLog('🚀', '开始执行Config推送...');
+            addDebugLog('[START]', '开始执行Config推送...');
             showLoading(10);
             
-            $.ajax({
+            jq.ajax({
                 type: 'POST',
                 url: "//" + host + "/config/push.json",
                 data: {
@@ -362,8 +364,8 @@
                 '<ul>' + suggestionHtml + '</ul>' +
                 '</div>';
             
-            $("#danger-message-area").html(alertHtml);
-            $("#danger-modal").modal('show');
+            jq("#danger-message-area").html(alertHtml);
+            jq("#danger-modal").modal('show');
         }
         
         function addDebugLog(icon, message) {
@@ -374,15 +376,15 @@
                 '<span>' + message + '</span>' +
                 '</div>';
             
-            var $logDisplay = $('#debug-log-display');
-            $logDisplay.append(logEntry);
-            $logDisplay.scrollTop($logDisplay[0].scrollHeight);
+            var jqlogDisplay = jq('#debug-log-display');
+            jqlogDisplay.append(logEntry);
+            jqlogDisplay.scrollTop(jqlogDisplay[0].scrollHeight);
         }
         
         window.clearDebugLog = function() {
-            $('#debug-log-display').empty();
-            $('#push-params-display').html('<p class="text-muted">点击推送按钮时显示参数</p>');
-            $('#module-match-display').html('<p class="text-muted">显示匹配的模块列表</p>');
+            jq('#debug-log-display').empty();
+            jq('#push-params-display').html('<p class=\"text-muted\">点击推送按钮时显示参数</p>');
+            jq('#module-match-display').html('<p class=\"text-muted\">显示匹配的模块列表</p>');
         };
         
     })
@@ -393,10 +395,10 @@
     // ==================== 方案2：Environment一致性检查器函数 ====================
     
     window.openEnvironmentChecker = function() {
-        if (!$('#environment-checker-modal').length) {
+        if (!jq('#environment-checker-modal').length) {
             createEnvironmentCheckerModal();
         }
-        $('#environment-checker-modal').modal('show');
+        jq('#environment-checker-modal').modal('show');
         runEnvironmentCheck();
     };
     
@@ -429,25 +431,25 @@
             '</div>' +
             '</div>' +
             '</div>';
-        $('body').append(modalHtml);
+        jq('body').append(modalHtml);
     }
     
     function runEnvironmentCheck() {
-        var $content = $('#environment-check-content');
-        $content.html('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> 正在检查...</div>');
+        var jqcontent = jq('#environment-check-content');
+        jqcontent.html('<div class=\"text-center\"><i class=\"fa fa-spinner fa-spin\"></i> 正在检查...</div>');
         
-        $.ajax({
+        jq.ajax({
             url: '/config/checkEnvironments.json',
             method: 'GET',
             success: function(response) {
                 if (response.success) {
                     displayEnvironmentCheckResult(response.data);
                 } else {
-                    $content.html('<div class="alert alert-danger">检查失败: ' + response.message + '</div>');
+                    jqcontent.html('<div class=\"alert alert-danger\">检查失败: ' + response.message + '</div>');
                 }
             },
             error: function() {
-                $content.html('<div class="alert alert-danger">检查失败，请重试</div>');
+                jqcontent.html('<div class=\"alert alert-danger\">检查失败，请重试</div>');
             }
         });
     }
@@ -461,13 +463,13 @@
                 '<h5><i class="fa fa-exclamation-triangle"></i> 发现Environment不匹配问题</h5>' +
                 '<p>发现 ' + data.issueCount + ' 个不匹配的Config配置</p>' +
                 '</div>';
-            $('#auto-fix-btn').show();
+            jq('#auto-fix-btn').show();
         } else {
             html += '<div class="alert alert-success">' +
                 '<h5><i class="fa fa-check"></i> Environment配置正常</h5>' +
                 '<p>所有Config的Environment都有对应的模块</p>' +
                 '</div>';
-            $('#auto-fix-btn').hide();
+            jq('#auto-fix-btn').hide();
         }
         
         // 详细的匹配表
@@ -509,12 +511,12 @@
             html += '</tbody></table>';
         }
         
-        $('#environment-check-content').html(html);
+        jq('#environment-check-content').html(html);
     }
     
     window.autoFixEnvironments = function() {
         if (confirm('确定要自动修复Environment不匹配的问题吗？这将修改Config表中的environment字段。')) {
-            $.ajax({
+            jq.ajax({
                 url: '/config/autoFixEnvironments.json',
                 method: 'POST',
                 success: function(response) {

@@ -297,10 +297,12 @@
 #parse("blocks/install-module.vm")
 
 <script type="application/javascript">
-    jQuery(function($){
-        $(".btn-active").on('click',function () {
-            var appName = $(this).attr('data-app');
-            var ip = $(this).attr('data-ip');
+    // 避免与Velocity的$符号冲突
+    var jq = jQuery.noConflict();
+    jq(function(){
+        jq(".btn-active").on('click',function () {
+            var appName = jq(this).attr('data-app');
+            var ip = jq(this).attr('data-ip');
             innerPost("/module/active.json", {'appName': appName,'ip':ip}, function (response) {
                 if (response.success) {
                     notice(response.message, response.success)
@@ -311,9 +313,9 @@
             });
         })
         
-        $(".btn-frozen").on('click',function () {
-            var appName = $(this).attr('data-app');
-            var ip = $(this).attr('data-ip');
+        jq(".btn-frozen").on('click',function () {
+            var appName = jq(this).attr('data-app');
+            var ip = jq(this).attr('data-ip');
             innerPost("/module/frozen.json", {'appName': appName,'ip':ip}, function (response) {
                 if (response.success) {
                     notice(response.message, response.success)
@@ -324,41 +326,41 @@
             });
         })
         
-        $(".btn-reload").on('click', function () {
-            var $btn = $(this);
-            var $row = $btn.closest('tr');
-            var appName = $btn.attr('data-app');
-            var ip = $btn.attr('data-ip');
+        jq(".btn-reload").on('click', function () {
+            var jqbtn = jq(this);
+            var jqrow = jqbtn.closest('tr');
+            var appName = jqbtn.attr('data-app');
+            var ip = jqbtn.attr('data-ip');
             
             // 1. 设置按钮加载状态
-            setButtonLoading($btn, true, 'reloading');
-            showOperationProgress($row, 'reload');
+            setButtonLoading(jqbtn, true, 'reloading');
+            showOperationProgress(jqrow, 'reload');
             
             // 2. 执行reload
             innerPost("/module/reload.json", {'appName': appName, 'ip': ip}, function (response) {
-                setButtonLoading($btn, false);
-                hideOperationProgress($row);
+                setButtonLoading(jqbtn, false);
+                hideOperationProgress(jqrow);
                 
                 if (response.success) {
                     // 成功：显示成功信息并更新状态
                     showSuccess(response.message, response.data);
-                    updateModuleStatus($row, 'reload-success');
+                    updateModuleStatus(jqrow, 'reload-success');
                     
                     // 3秒后验证模块状态
                     setTimeout(function() {
-                        verifyModuleStatus(appName, ip, $row);
+                        verifyModuleStatus(appName, ip, jqrow);
                     }, 3000);
                     
                 } else {
                     // 失败：显示详细错误信息
                     showError(i18n.get('operation.reload.failed'), response.message, response.data);
-                    updateModuleStatus($row, 'reload-failed');
+                    updateModuleStatus(jqrow, 'reload-failed');
                 }
             });
         })
         
-        $("#btn-install").on("click", function () {
-            var modal = $('#start-install-modal');
+        jq("#btn-install").on("click", function () {
+            var modal = jq('#start-install-modal');
             
             // 重置表单，确保干净的状态
             modal.find('#startInstallForm')[0].reset();
@@ -1013,67 +1015,67 @@
         
         function checkAllModuleStatus() {
             console.log('[CHECK] 开始检测所有模块状态...');
-            var $rows = $('.module-row');
+            var rows = jq('.module-row');
             
-            if ($rows.length === 0) {
+            if (rows.length === 0) {
                 console.log('[INFO] 没有发现模块，跳过检测');
                 return;
             }
             
-            $rows.each(function(index) {
-                var $row = $(this);
-                var appName = $row.data('app');
-                var ip = $row.data('ip');
+            rows.each(function(index) {
+                var row = jq(this);
+                var appName = row.data('app');
+                var ip = row.data('ip');
                 
                 if (!appName || !ip) {
-                    console.warn('[WARN] 模块信息不完整，跳过:', $row.get(0));
+                    console.warn('[WARN] 模块信息不完整，跳过:', row.get(0));
                     return;
                 }
                 
                 // 延迟检测，避免同时发起太多请求
                 setTimeout(function() {
-                    checkSingleModuleStatus(appName, ip, $row);
+                    checkSingleModuleStatus(appName, ip, row);
                 }, index * 200);
             });
         }
         
-        function checkSingleModuleStatus(appName, ip, $row) {
+        function checkSingleModuleStatus(appName, ip, row) {
             // 标记正在检测
-            var $indicators = $row.find('.status-indicators');
-            $indicators.find('.fa-circle').removeClass('text-success text-warning text-danger text-muted')
+            var indicators = row.find('.status-indicators');
+            indicators.find('.fa-circle').removeClass('text-success text-warning text-danger text-muted')
                       .addClass('text-info')
                       .attr('title', '检测中...');
             
-            $.get("/module/status.json", {appName: appName, ip: ip})
+            jq.get("/module/status.json", {appName: appName, ip: ip})
                 .done(function(response) {
                     if (response.success) {
-                        updateModuleStatusDisplay($row, response.data);
-                        updateHeartbeatTime($row, response.data.lastHeartbeat);
+                        updateModuleStatusDisplay(row, response.data);
+                        updateHeartbeatTime(row, response.data.lastHeartbeat);
                         
                         // 记录检测结果
                         var status = response.data.online ? '在线' : '离线';
                         var moduleStatus = response.data.moduleActive ? '运行中' : '异常';
                         console.log('[OK] ' + appName + '@' + ip + ': ' + status + ', ' + moduleStatus + ', ' + response.data.responseTime + 'ms');
                     } else {
-                        updateModuleStatusOffline($row, response.message);
+                        updateModuleStatusOffline(row, response.message);
                         console.log('[ERROR] ' + appName + '@' + ip + ': 检测失败 - ' + response.message);
                     }
                 })
                 .fail(function(xhr, status, error) {
-                    updateModuleStatusOffline($row, '网络错误: ' + error);
+                    updateModuleStatusOffline(row, '网络错误: ' + error);
                     console.log('[NET] ' + appName + '@' + ip + ': 网络异常 - ' + error);
                 });
         }
         
-        function updateModuleStatusOffline($row, error) {
+        function updateModuleStatusOffline(row, error) {
             var statusHtml = '<i class="fa fa-circle text-danger" title="连接失败: ' + error + '"></i>' +
                 '<span class="badge badge-danger">' + i18n.get('status.offline') + '</span>';
-            $row.find('.status-indicators').html(statusHtml);
+            row.find('.status-indicators').html(statusHtml);
         }
         
-        function updateHeartbeatTime($row, lastHeartbeat) {
+        function updateHeartbeatTime(row, lastHeartbeat) {
             if (lastHeartbeat) {
-                var heartbeatCell = $row.find('td').eq(7); // 心跳时间列
+                var heartbeatCell = row.find('td').eq(7); // 心跳时间列
                 heartbeatCell.text(lastHeartbeat);
             }
         }
